@@ -1,0 +1,43 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "FastAPI: app.server (uvicorn)",
+  "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "app.server:app",
+        "--reload",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "11434"
+      ],
+      "justMyCode": true,
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python: buddy_gui.py",
+  "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/buddy_gui.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python: installer.py",
+  "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/installer.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Pytest (tests/)",
+  "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-q", "tests"],
+      "console": "integratedTerminal"
+    }
+  ]
+}

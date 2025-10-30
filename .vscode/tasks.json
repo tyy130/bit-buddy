@@ -1,0 +1,54 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run RAG server (uvicorn)",
+      "type": "shell",
+      "command": "uvicorn app.server:app --host 127.0.0.1 --port 11434 --reload",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Reindex KB (HTTP POST)",
+      "type": "shell",
+      "command": "curl -s -X POST http://127.0.0.1:11434/reindex || true",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run pre-build tests",
+      "type": "shell",
+      "command": "python tools/pre_build_test.py",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run pytest",
+      "type": "shell",
+      "command": "pytest -q",
+      "group": "test",
+      "problemMatcher": ["$python"]
+    },
+    {
+      "label": "Format (Black)",
+      "type": "shell",
+      "command": "black .",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "Build (PyInstaller)",
+      "type": "shell",
+      "command": "pyinstaller build/config/buddy.spec --clean",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run GUI (may need local OS)",
+      "type": "shell",
+      "command": "python buddy_gui.py",
+      "group": "none",
+      "problemMatcher": []
+    }
+  ]
+}

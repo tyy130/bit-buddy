@@ -1,0 +1,35 @@
+{
+  "editor.formatOnSave": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.eol": "\n",
+
+  // Python
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": ["-q", "tests"],
+  "python.analysis.typeCheckingMode": "basic",
+
+  // Formatters
+  "editor.defaultFormatter": "ms-python.black-formatter",
+  "black-formatter.args": ["--line-length", "79"],
+  "isort.args": ["--profile", "black"],
+
+  // Linting (optional if using flake8/ruff externally)
+  "python.linting.enabled": true,
+  "python.linting.flake8Enabled": true,
+  "python.linting.flake8Args": ["--max-line-length=79"],
+
+  // Test UI
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
+
+  // Files to hide in explorer
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "build": true,
+    "dist": true,
+    "index/embeddings.npy": true,
+    "index/meta.jsonl": true
+  }
+}
