@@ -7,39 +7,42 @@ Builds standalone executable for Windows, macOS, and Linux
 import sys
 from pathlib import Path
 
+# Resolve project root (repo root is two levels up from this spec file)
+ROOT = Path(__file__).resolve().parents[2]
+
 block_cipher = None
 
 # Determine platform-specific settings
 if sys.platform == 'win32':
-    icon_file = 'assets/buddy_icon.ico'
+    icon_file = str(ROOT / 'assets' / 'buddy_icon.ico')
     name = 'BitBuddy'
 elif sys.platform == 'darwin':
-    icon_file = 'assets/buddy_icon.icns'
+    icon_file = str(ROOT / 'assets' / 'buddy_icon.icns')
     name = 'BitBuddy'
 else:
     icon_file = None
     name = 'bit-buddy'
 
 a = Analysis(
-    ['buddy_gui.py'],
-    pathex=[],
+    [str(ROOT / 'buddy_gui.py')],
+    pathex=[str(ROOT)],
     binaries=[],
     datas=[
         # Include app modules
-        ('app/*.py', 'app'),
-        ('app/config.yaml', 'app'),
+        (f"{ROOT}/app/*.py", 'app'),
+        (f"{ROOT}/app/config.yaml", 'app'),
 
         # Include custodian templates
-        ('custodian/manifest.yaml', 'custodian'),
-        ('custodian/policy.yaml', 'custodian'),
+        (f"{ROOT}/custodian/manifest.yaml", 'custodian'),
+        (f"{ROOT}/custodian/policy.yaml", 'custodian'),
 
         # Include enhanced_buddy and dependencies
-        ('enhanced_buddy.py', '.'),
-        ('installer.py', '.'),
+        (f"{ROOT}/enhanced_buddy.py", '.'),
+        (f"{ROOT}/installer.py", '.'),
 
     # Include README and docs
-    ('README.md', '.'),
-    ('docs/user/END_USER_GUIDE.md', 'docs/user'),
+        (f"{ROOT}/README.md", '.'),
+        (f"{ROOT}/docs/user/END_USER_GUIDE.md", 'docs/user'),
     ],
     hiddenimports=[
         # FastAPI and dependencies
