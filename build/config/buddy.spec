@@ -39,7 +39,7 @@ a = Analysis(
         
         # Include README and docs
         ('README.md', '.'),
-        ('END_USER_GUIDE.md', '.'),
+        ('docs/user/END_USER_GUIDE.md', 'docs/user'),
     ],
     hiddenimports=[
         # FastAPI and dependencies

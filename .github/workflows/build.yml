@@ -1,0 +1,208 @@
+name: Build Bit Buddy Application
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Create application icon (temporary)
+        run: |
+          # Create assets directory if it doesn't exist
+          if (-not (Test-Path "assets")) { New-Item -ItemType Directory -Path "assets" }
+          # For now, we'll build without icon since we don't have one yet
+          echo "Icon creation skipped - will build without icon"
+
+      - name: Run pre-build tests
+        run: |
+          python -c "from enhanced_buddy import EnhancedBitBuddy; print('✅ Core imports successful')"
+          python -c "import buddy_gui; print('✅ GUI imports successful')"
+
+      - name: Build Windows executable
+        run: |
+          pyinstaller build/config/buddy.spec --clean --noconfirm
+        
+      - name: Test executable
+        run: |
+          # Basic test - just check if executable was created and can start
+          if (Test-Path "dist/BitBuddy.exe") {
+            echo "✅ Executable created successfully"
+            # Quick smoke test (will fail without display but that's expected)
+            try {
+              & "./dist/BitBuddy.exe" --help 2>$null
+            } catch {
+              echo "Expected - GUI app requires display"
+            }
+          } else {
+            echo "❌ Executable not found"
+            exit 1
+          }
+
+      - name: Upload Windows executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: bit-buddy-windows
+          path: dist/BitBuddy.exe
+          retention-days: 30
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Run pre-build tests
+        run: |
+          python -c "from enhanced_buddy import EnhancedBitBuddy; print('✅ Core imports successful')"
+          python -c "import buddy_gui; print('✅ GUI imports successful')"
+
+      - name: Build Linux executable
+        run: |
+          pyinstaller build/config/buddy.spec --clean --noconfirm
+
+      - name: Test executable
+        run: |
+          if [ -f "dist/bit-buddy" ]; then
+            echo "✅ Executable created successfully"
+            # Make it executable
+            chmod +x dist/bit-buddy
+          else
+            echo "❌ Executable not found"
+            exit 1
+          fi
+
+      - name: Upload Linux executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: bit-buddy-linux
+          path: dist/bit-buddy
+          retention-days: 30
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Run pre-build tests
+        run: |
+          python -c "from enhanced_buddy import EnhancedBitBuddy; print('✅ Core imports successful')"
+          python -c "import buddy_gui; print('✅ GUI imports successful')"
+
+      - name: Build macOS application
+        run: |
+          pyinstaller build/config/buddy.spec --clean --noconfirm
+
+      - name: Test application bundle
+        run: |
+          if [ -d "dist/BitBuddy.app" ]; then
+            echo "✅ Application bundle created successfully"
+          else
+            echo "❌ Application bundle not found"
+            exit 1
+          fi
+
+      - name: Create DMG (if app bundle exists)
+        run: |
+          if [ -d "dist/BitBuddy.app" ]; then
+            # Create a simple DMG
+            mkdir -p dist/dmg
+            cp -R dist/BitBuddy.app dist/dmg/
+            ln -s /Applications dist/dmg/
+            hdiutil create -volname "Bit Buddy" -srcfolder dist/dmg -ov -format UDZO dist/BitBuddy.dmg
+            echo "✅ DMG created"
+          fi
+
+      - name: Upload macOS application
+        uses: actions/upload-artifact@v4
+        with:
+          name: bit-buddy-macos
+          path: |
+            dist/BitBuddy.app
+            dist/BitBuddy.dmg
+          retention-days: 30
+
+  create-release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            bit-buddy-windows/BitBuddy.exe
+            bit-buddy-linux/bit-buddy
+            bit-buddy-macos/BitBuddy.dmg
+          body: |
+            ## Bit Buddy Desktop Application
+            
+            Download the appropriate version for your operating system:
+            
+            - **Windows**: `BitBuddy.exe`
+            - **Linux**: `bit-buddy`
+            - **macOS**: `BitBuddy.dmg`
+            
+            ### First Run
+            1. Run the executable
+            2. Follow the setup wizard
+            3. Choose your buddy's personality
+            4. Select folders to watch
+            5. Start chatting with your file companion!
+            
+            ### System Requirements
+            - Windows 10+, macOS 12+, or Linux
+            - 4GB RAM minimum (8GB recommended)
+            - 2GB free disk space
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
