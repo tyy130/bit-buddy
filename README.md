@@ -1,19 +1,81 @@
 # 🤖 Bit Buddy - Personal File System Companion
 
-> *Your files deserve a friend who truly knows them*
+<p align="center">
+  <img src="assets/bit-buddy-logo.png" alt="Bit Buddy Logo" width="400">
+</p>
 
-Bit Buddy is a digital companion that lives on your computer, learns about your files, and develops a unique personality based on what it discovers. Think of it as a cross between a file manager, a personal assistant, and a digital pet that actually cares about your documents.
+<p align="center">
+  <em>Your files deserve a friend who truly knows them</em>
+</p>
+
+---
+
+Bit Buddy is a **living digital companion** that inhabits your filesystem. Not just software that responds, but a unique entity with its own personality, moods, and genuine reactions to your data. Each bit buddy explores files with their own curiosity, gets overwhelmed by chaos in their own way, and celebrates discoveries with their unique voice.
+
+## 🎨 Meet Your Companions
+
+Choose from four unique starter characters, each with their own personality:
+
+<p align="center">
+  <img src="assets/characters/character_purple_green.png" width="120" alt="Glitch">
+  <img src="assets/characters/character_orange_blue.png" width="120" alt="Citrus">
+  <img src="assets/characters/character_teal_orange.png" width="120" alt="Slate">
+  <img src="assets/characters/character_pink_green.png" width="120" alt="Nova">
+</p>
+
+<table align="center">
+  <tr>
+    <th>Glitch</th>
+    <th>Citrus</th>
+    <th>Slate</th>
+    <th>Nova</th>
+  </tr>
+  <tr>
+    <td>Chaotic Hacker</td>
+    <td>Cheerful Optimist</td>
+    <td>Wise Minimalist</td>
+    <td>Energetic Sidekick</td>
+  </tr>
+  <tr>
+    <td><em>"Living between bad sectors..."</em></td>
+    <td><em>"Installed on a Friday!"</em></td>
+    <td><em>"Processing... with purpose."</em></td>
+    <td><em>"Line 404: still not found."</em></td>
+  </tr>
+</table>
 
 ## 🌟 What Makes Bit Buddy Special?
 
-- **🎭 Unique Personality**: Each buddy develops its own humor, curiosity, and expertise based on your files
-- **🔍 Instant File Intelligence**: Ask "Find my vacation photos from 2019" and get instant results
+- **🎭 Autonomous Personality**: Each buddy generates completely unique traits on first boot and maintains them persistently
+- **🔍 Instant File Intelligence**: Ask "Find my vacation photos from 2019" and get intelligent, personality-driven responses
 - **🧠 Local AI Brain**: Everything runs on your machine - your privacy stays yours
-- **🌐 Buddy Network**: Multiple buddies can share knowledge while maintaining their personalities  
-- **📈 Growth Over Time**: Your buddy gets smarter and more helpful as it learns your patterns
-- **💾 Lightweight**: Runs on <1GB RAM with micro-LLM models
+- **🌐 Buddy Network**: Multiple buddies can share knowledge while maintaining their unique personalities
+- **📈 Emergent Narrative**: Through daily interactions, each buddy develops its own story over time
+- **💾 Lightweight**: Runs on <2GB RAM with micro-LLM models (TinyLlama, Qwen2.5, Phi-3.5)
 
 ## 🚀 Quick Start (5 Minutes)
+
+### Option A: Desktop App (Recommended for New Users)
+
+**Windows:**
+```cmd
+1. Download BitBuddySetup-1.0.0.exe
+2. Run installer
+3. Choose your drive and AI model
+4. Pick your character (Glitch, Citrus, Slate, or Nova)
+5. Start chatting with your new companion!
+```
+
+**macOS:**
+```bash
+1. Download BitBuddy.dmg
+2. Drag to Applications
+3. Launch and follow setup wizard
+4. Choose your character
+5. Begin your journey together!
+```
+
+### Option B: Developer Setup (Full Control)
 
 ```bash
 # 1. Clone and setup
@@ -33,6 +95,41 @@ python start_buddy.py
 💭 Ask your buddy: What files do you see?
 🤖 Pixel: I see some interesting documents here! There's a welcome.txt that seems excited to meet me, and a README.md that explains what I can do. I'm curious about that BitBuddy_Projects folder - are you working on something creative? 
 ```
+
+### Option B: RAG Service Only (Production API)
+
+For deploying just the RAG API service without the personality layer:
+
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Configure your knowledge base
+mkdir -p kb
+# Add your .txt, .md, .pdf, or .docx files to kb/
+
+# 3. Update app/config.yaml
+# - Set your LLM provider (llamacpp or ollama)
+# - Configure embedding model (default: BAAI/bge-small-en-v1.5)
+
+# 4. Start the RAG service
+uvicorn app.server:app --host 127.0.0.1 --port 8000
+
+# 5. Check health
+curl http://127.0.0.1:8000/health
+# {"status":"healthy","rag_initialized":true,"ready":true}
+
+# 6. Build the index
+curl -X POST http://127.0.0.1:8000/reindex
+# {"status":"ok","chunks":42}
+
+# 7. Query your knowledge base
+curl -X POST http://127.0.0.1:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"query":"What is FastAPI?","k":5}'
+```
+
+**Note**: `/reindex` may take 30-60 seconds on first run as it downloads the embedding model and processes your knowledge base.
 
 ## 🎯 Core Features
 
@@ -260,6 +357,77 @@ docker run -it bit-buddy-test python -m pytest -v
 
 ### Common Issues
 
+## 🔧 Troubleshooting
+
+**"Cannot GET /" when visiting server**
+```bash
+# Make sure the server is actually running
+ps aux | grep uvicorn
+
+# Check server health
+curl http://127.0.0.1:8000/health
+
+# View server logs if started in background
+tail -f /tmp/server.log
+
+# Restart with proper logging
+uvicorn app.server:app --host 127.0.0.1 --port 8000 --log-level info
+```
+
+**"RAG service not available" (503 error)**
+```bash
+# Check /health endpoint for the specific error
+curl http://127.0.0.1:8000/health
+# {"status":"unhealthy","rag_initialized":false,"ready":false,"error":"..."}
+
+# Common causes:
+# 1. Unsupported embedding model - update app/config.yaml
+# 2. Missing dependencies - pip install -r requirements.txt
+# 3. Memory issues - try a smaller embedding model
+
+# Fix embedding model
+# Edit app/config.yaml and set:
+#   embedder:
+#     model: "BAAI/bge-small-en-v1.5"
+#     dim: 384
+```
+
+**"/reindex endpoint hangs or times out"**
+```bash
+# The embedding model downloads ~66MB on first run and may take 30-60s
+# If it hangs indefinitely, there may be resource constraints
+
+# Workaround: Create a pre-built index manually
+python - <<'PY'
+import numpy as np, json, os
+os.makedirs("index", exist_ok=True)
+# Create minimal dummy index
+emb = np.random.randn(1, 384).astype(np.float32)
+emb = emb / (np.linalg.norm(emb, axis=1, keepdims=True) + 1e-12)
+np.save("index/embeddings.npy", emb)
+with open("index/meta.jsonl", "w") as f:
+    f.write('{"path":"test.txt","chunk_id":0,"chars":100}\n')
+print("✓ Created dummy index")
+PY
+
+# Then restart the server - it will load the pre-built index
+```
+
+**"LLM not responding in /chat"**
+```bash
+# The /chat endpoint requires either llama.cpp or Ollama running
+
+# Option 1: Start llama.cpp server (if using llamacpp provider)
+# Download llama.cpp and start with:
+# ./server --model models/your-model.gguf --port 8080
+
+# Option 2: Start Ollama (if using ollama provider)
+ollama serve &
+ollama pull qwen2.5:1.5b-instruct
+
+# Then verify config in app/config.yaml matches your setup
+```
+
 **"Python not found" / "Dependencies missing"**
 ```bash
 # Use GitHub Codespaces instead - zero setup required
@@ -340,6 +508,10 @@ We welcome contributions! Your buddy wants friends to help it grow:
 # Clone for development
 git clone <repository>
 cd bit-buddy
+
+## 🐛 Troubleshooting
+
+### Start → Reindex → Query (quick example)
 
 # Install dev dependencies  
 pip install -r requirements.txt

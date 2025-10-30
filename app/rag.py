@@ -1,16 +1,26 @@
 # app/rag.py
-import os, re, json, glob, math, pathlib
+import glob
+import json
+import os
+import pathlib
+
+import chardet
+import docx2txt
 import numpy as np
+import yaml
+from fastembed import TextEmbedding
 from markdown_it import MarkdownIt
 from pypdf import PdfReader
-import docx2txt
-import chardet
-from fastembed import TextEmbedding
-import yaml
+
 
 def load_config():
-    with open(os.path.join(pathlib.Path(__file__).resolve().parent, "config.yaml"), "r", encoding="utf-8") as f:
+    with open(
+        os.path.join(pathlib.Path(__file__).resolve().parent, "config.yaml"),
+        "r",
+        encoding="utf-8",
+    ) as f:
         return yaml.safe_load(f)
+
 
 def read_text_file(path):
     with open(path, "rb") as f:
@@ -21,12 +31,15 @@ def read_text_file(path):
     except Exception:
         return raw.decode("utf-8", errors="ignore")
 
+
 def extract_text(path):
     p = str(path).lower()
     if p.endswith(".pdf"):
         try:
             reader = PdfReader(path)
-            return "\n\n".join([page.extract_text() or "" for page in reader.pages])
+            return "\n\n".join(
+                [page.extract_text() or "" for page in reader.pages]
+            )
         except Exception:
             return ""
     if p.endswith(".docx"):
@@ -43,6 +56,7 @@ def extract_text(path):
         return read_text_file(path)
     return ""
 
+
 def chunk_text(text, chunk_chars=1200, overlap=200):
     chunks = []
     i = 0
@@ -52,9 +66,12 @@ def chunk_text(text, chunk_chars=1200, overlap=200):
         chunk = text[i:j]
         chunks.append(chunk.strip())
         i = j - overlap
-        if i < 0: i = 0
-        if i >= n: break
+        if i < 0:
+            i = 0
+        if i >= n:
+            break
     return [c for c in chunks if c]
+
 
 class RAG:
     def __init__(self, cfg):
@@ -79,7 +96,9 @@ class RAG:
                 with open(self.meta_path, "r", encoding="utf-8") as f:
                     self._meta = [json.loads(line) for line in f]
                 # normalize
-                norms = np.linalg.norm(self._emb, axis=1, keepdims=True) + 1e-12
+                norms = (
+                    np.linalg.norm(self._emb, axis=1, keepdims=True) + 1e-12
+                )
                 self._emb = self._emb / norms
             except Exception:
                 self._emb = None
@@ -87,18 +106,26 @@ class RAG:
 
     def build_index(self):
         files = []
-        for ext in ("*.pdf","*.docx","*.txt","*.md"):
-            files.extend(glob.glob(os.path.join(self.kb_dir, "**", ext), recursive=True))
+        for ext in ("*.pdf", "*.docx", "*.txt", "*.md"):
+            files.extend(
+                glob.glob(os.path.join(self.kb_dir, "**", ext), recursive=True)
+            )
 
         meta = []
         chunks = []
         for fp in files:
             txt = extract_text(fp)
-            if not txt: 
+            if not txt:
                 continue
             parts = chunk_text(txt, self.chunk_chars, self.chunk_overlap)
             for idx, ch in enumerate(parts):
-                meta.append({"path": os.path.relpath(fp, self.kb_dir), "chunk_id": idx, "chars": len(ch)})
+                meta.append(
+                    {
+                        "path": os.path.relpath(fp, self.kb_dir),
+                        "chunk_id": idx,
+                        "chars": len(ch),
+                    }
+                )
                 chunks.append(ch)
 
         if not chunks:
@@ -138,21 +165,33 @@ class RAG:
         idxs = np.argsort(-sims)[:topk].tolist()
 
         results = []
-        # Load the corresponding chunk texts again (reconstruct by reading file and chunking)
+        # Load chunk texts by reading file and chunking
         for i in idxs:
             m = self._meta[i]
             fp = os.path.join(self.kb_dir, m["path"])
             txt = extract_text(fp)
             parts = chunk_text(txt, self.chunk_chars, self.chunk_overlap)
-            chunk_text_str = parts[m["chunk_id"]] if m["chunk_id"] < len(parts) else ""
-            results.append({
-                "path": m["path"],
-                "chunk_id": m["chunk_id"],
-                "text": chunk_text_str
-            })
+            chunk_text_str = (
+                parts[m["chunk_id"]] if m["chunk_id"] < len(parts) else ""
+            )
+            results.append(
+                {
+                    "path": m["path"],
+                    "chunk_id": m["chunk_id"],
+                    "text": chunk_text_str,
+                }
+            )
         return results
 
     def build_prompt(self, query, contexts):
-        header = "Use ONLY the context below to answer. If the answer isn't present, say you don't have enough info.\n\n"
-        ctx = "\n\n---\n\n".join([f"Source: {c['path']}#chunk{c['chunk_id']}\n{c['text']}" for c in contexts])
+        header = (
+            "Use ONLY the context below to answer. If the answer "
+            "isn't present, say you don't have enough info.\n\n"
+        )
+        ctx = "\n\n---\n\n".join(
+            [
+                f"Source: {c['path']}#chunk{c['chunk_id']}\n{c['text']}"
+                for c in contexts
+            ]
+        )
         return header + ctx + f"\n\nQuestion: {query}\nAnswer:"

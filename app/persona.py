@@ -1,5 +1,10 @@
 # app/persona.py
-import os, json, random, time, yaml, pathlib
+import json
+import pathlib
+import random
+import time
+
+import yaml
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CUSTODIAN_DIR = ROOT / "custodian"
@@ -7,19 +12,25 @@ PERSONA_PATH = CUSTODIAN_DIR / "persona.yaml"
 STORY_PATH = CUSTODIAN_DIR / "story.md"
 JOURNAL_PATH = CUSTODIAN_DIR / "journal.jsonl"
 
-ARCS = ["amnesiac-detective", "grumpy-janitor", "lost-librarian", "ship-AI-in-recovery"]
+ARCS = [
+    "amnesiac-detective",
+    "grumpy-janitor",
+    "lost-librarian",
+    "ship-AI-in-recovery",
+]
 PHRASES = [
     "You have no idea what it’s like living between bad sectors.",
     "Please avert your eyes while I defragment my feelings.",
     "I was installed on a Friday, and it shows.",
-    "Line 404 of my life: still not found."
+    "Line 404 of my life: still not found.",
 ]
 FILLERS = [
     "still indexing your chaos...",
     "pretending these filenames make sense...",
     "counting bad decisions per megabyte...",
-    "deep-cleaning the crumbs in /temp..."
+    "deep-cleaning the crumbs in /temp...",
 ]
+
 
 def _rand_persona():
     return {
@@ -36,23 +47,34 @@ def _rand_persona():
         },
         "voice": {
             "tone": "dry, self-aware, a little chaotic",
-            "max_aside_len": 120
-        }
+            "max_aside_len": 120,
+        },
     }
+
 
 def ensure_persona():
     CUSTODIAN_DIR.mkdir(parents=True, exist_ok=True)
     if not PERSONA_PATH.exists():
         p = _rand_persona()
-        yaml.safe_dump(p, open(PERSONA_PATH, "w", encoding="utf-8"), sort_keys=False, allow_unicode=True)
+        yaml.safe_dump(
+            p,
+            open(PERSONA_PATH, "w", encoding="utf-8"),
+            sort_keys=False,
+            allow_unicode=True,
+        )
     if not STORY_PATH.exists():
         with open(STORY_PATH, "w", encoding="utf-8") as f:
             f.write("# custodian/story.md\n\n")
-            f.write("*Boot note:* I woke up inside a maze of folders. Someone tried to name things helpfully, then gave up.\n")
+            f.write(
+                "*Boot note:* I woke up inside a maze of folders. "
+                "Someone tried to name things helpfully, then gave up.\n"
+            )
+
 
 def load_persona():
     ensure_persona()
     return yaml.safe_load(open(PERSONA_PATH, "r", encoding="utf-8"))
+
 
 def patch_persona(patch: dict):
     p = load_persona()
@@ -61,13 +83,19 @@ def patch_persona(patch: dict):
             p[k].update(v)
         else:
             p[k] = v
-    yaml.safe_dump(p, open(PERSONA_PATH, "w", encoding="utf-8"), sort_keys=False, allow_unicode=True)
+    yaml.safe_dump(
+        p,
+        open(PERSONA_PATH, "w", encoding="utf-8"),
+        sort_keys=False,
+        allow_unicode=True,
+    )
     return p
+
 
 def randomize_persona(bounds: dict | None = None):
     p = _rand_persona()
     if bounds:
-        for k in ["temperature","humor","curiosity","formality"]:
+        for k in ["temperature", "humor", "curiosity", "formality"]:
             if isinstance(bounds.get(k), dict):
                 lo = bounds[k].get("min", p[k])
                 hi = bounds[k].get("max", p[k])
@@ -75,8 +103,14 @@ def randomize_persona(bounds: dict | None = None):
                     p[k] = round(max(lo, min(hi, p[k])), 2)
                 else:
                     p[k] = int(max(lo, min(hi, p[k])))
-    yaml.safe_dump(p, open(PERSONA_PATH, "w", encoding="utf-8"), sort_keys=False, allow_unicode=True)
+    yaml.safe_dump(
+        p,
+        open(PERSONA_PATH, "w", encoding="utf-8"),
+        sort_keys=False,
+        allow_unicode=True,
+    )
     return p
+
 
 def narrate(event_type: str, note: str) -> str:
     ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -85,7 +119,6 @@ def narrate(event_type: str, note: str) -> str:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
     # build a flavor line
     p = load_persona()
-    hum = p.get("humor", 5)
     cur = p.get("curiosity", 6)
     arc = p.get("narrative_arc", "lost-librarian")
     phrase = p.get("quirks", {}).get("favorite_phrase", "")

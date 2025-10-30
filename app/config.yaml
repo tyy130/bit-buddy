@@ -17,8 +17,8 @@ llm:
     model: "qwen2.5:1.5b-instruct"
 
 embedder:
-  model: "bge-small-en"     # FastEmbed offline model
-  dim: 384                  # embedding dimension for bge-small-en
+  model: "BAAI/bge-small-en-v1.5"  # FastEmbed offline model (updated)
+  dim: 384                          # embedding dimension
 
 index:
   dir: "index"
