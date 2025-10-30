@@ -28,18 +28,18 @@ a = Analysis(
         # Include app modules
         ('app/*.py', 'app'),
         ('app/config.yaml', 'app'),
-        
+
         # Include custodian templates
         ('custodian/manifest.yaml', 'custodian'),
         ('custodian/policy.yaml', 'custodian'),
-        
+
         # Include enhanced_buddy and dependencies
         ('enhanced_buddy.py', '.'),
         ('installer.py', '.'),
-        
-        # Include README and docs
-        ('README.md', '.'),
-        ('docs/user/END_USER_GUIDE.md', 'docs/user'),
+
+    # Include README and docs
+    ('README.md', '.'),
+    ('docs/user/END_USER_GUIDE.md', 'docs/user'),
     ],
     hiddenimports=[
         # FastAPI and dependencies
@@ -47,7 +47,7 @@ a = Analysis(
         'uvicorn',
         'pydantic',
         'starlette',
-        
+
         # AI/ML dependencies
         'fastembed',
         'fastembed.text',
@@ -56,18 +56,18 @@ a = Analysis(
         'chromadb',
         'numpy',
         'torch',
-        
+
         # Document processing
         'pypdf',
         'docx2txt',
         'markdown_it',
         'chardet',
-        
+
         # Utilities
         'yaml',
         'psutil',
         'requests',
-        
+
         # Tkinter (should be included but being explicit)
         'tkinter',
         'tkinter.scrolledtext',

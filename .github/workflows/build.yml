@@ -16,9 +16,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: windows-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            windows-pip-
 
       - name: Install dependencies
         run: |
@@ -41,7 +49,16 @@ jobs:
       - name: Build Windows executable
         run: |
           pyinstaller build/config/buddy.spec --clean --noconfirm
-        
+
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup -y
+
+      - name: Build Windows installer
+        run: |
+          ISCC.exe build/config/BitBuddyInstaller.iss
+        continue-on-error: true
+
       - name: Test executable
         run: |
           # Basic test - just check if executable was created and can start
@@ -65,6 +82,16 @@ jobs:
           path: dist/BitBuddy.exe
           retention-days: 30
 
+      - name: Upload Windows installer
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bit-buddy-windows-installer
+          path: |
+            dist/**/*.exe
+            build/installer/**/*.exe
+          retention-days: 30
+
   build-linux:
     runs-on: ubuntu-latest
     steps:
@@ -72,7 +99,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -186,20 +213,20 @@ jobs:
             bit-buddy-macos/BitBuddy.dmg
           body: |
             ## Bit Buddy Desktop Application
-            
+
             Download the appropriate version for your operating system:
-            
+
             - **Windows**: `BitBuddy.exe`
             - **Linux**: `bit-buddy`
             - **macOS**: `BitBuddy.dmg`
-            
+
             ### First Run
             1. Run the executable
             2. Follow the setup wizard
             3. Choose your buddy's personality
             4. Select folders to watch
             5. Start chatting with your file companion!
-            
+
             ### System Requirements
             - Windows 10+, macOS 12+, or Linux
             - 4GB RAM minimum (8GB recommended)
