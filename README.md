@@ -214,9 +214,58 @@ Buddy: "Let me investigate! 🔍 I see several document versions... Found resume
 - **Storage**: 10GB free space
 - **SSD**: For best performance
 
+## 🧪 Testing & Development
+
+### 🌐 GitHub-Based Testing (No Local Dependencies)
+
+**Option 1: GitHub Codespaces (Recommended)**
+```bash
+# 1. Push repo to GitHub
+# 2. Open "Code" → "Codespaces" → "Create codespace"  
+# 3. Wait for auto-setup (installs everything)
+# 4. Test immediately:
+python -m pytest tests/ -v
+./docker-mesh-test.sh
+```
+
+**Option 2: GitHub Actions (Automatic)**
+```bash
+# Push code - tests run automatically
+git push origin main
+# Check "Actions" tab for results across all platforms
+```
+
+**Option 3: Local Testing (Requires Python)**
+```bash
+# Install dependencies first
+pip install -r requirements.txt
+python setup.py --development
+
+# Run tests
+python test_runner.py --all --verbose
+python debug_tools.py --check-system
+```
+
+### 🐳 Container Testing
+```bash
+# Test in isolated containers (no local Python needed)
+docker build -t bit-buddy-test .
+docker run -it bit-buddy-test python -m pytest -v
+
+# Test mesh networking between containers
+./docker-mesh-test.sh
+```
+
 ## 🐛 Troubleshooting
 
 ### Common Issues
+
+**"Python not found" / "Dependencies missing"**
+```bash
+# Use GitHub Codespaces instead - zero setup required
+# Or install Python from python.org first
+# See test-local-alternative.md for detailed options
+```
 
 **"Model download failed"**
 ```bash
