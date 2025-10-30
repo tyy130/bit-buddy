@@ -1,0 +1,43 @@
+# Bit Buddy - Personal File System Companion
+# Core dependencies for the enhanced bit buddy system
+
+# FastAPI and web framework
+fastapi>=0.115.0
+uvicorn>=0.30.6
+python-multipart>=0.0.6
+
+# AI and ML
+sentence-transformers>=2.2.2
+transformers>=4.35.0
+torch>=2.0.0
+chromadb>=0.4.18
+llama-cpp-python>=0.2.20
+fastembed>=0.3.4
+
+# File system and monitoring
+watchdog>=3.0.0
+pypdf>=4.3.1  # PDF processing
+docx2txt>=0.8  # Word docs
+openpyxl>=3.1.0  # Excel files
+Pillow>=10.1.0  # Image processing
+chardet>=5.2.0
+markdown-it-py>=3.0.0
+
+# Networking and security
+requests>=2.32.3
+cryptography>=41.0.0
+websockets>=12.0
+
+# System utilities
+psutil>=5.9.0
+click>=8.1.0  # For CLI interfaces
+rich>=13.7.0  # Beautiful terminal output
+
+# Data handling
+pandas>=2.1.0
+numpy>=2.1.2
+pydantic>=2.4.0
+
+# Development and testing (optional)
+pytest>=7.4.0
+pytest-asyncio>=0.21.0

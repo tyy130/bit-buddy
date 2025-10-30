@@ -1,0 +1,20 @@
+# custodian/policy.yaml
+share:
+  raw_text: false
+  snippets: true
+  max_chars_per_snippet: 800
+  max_snippets: 3
+  include_provenance: true
+privacy:
+  redactions:
+    # very simple examples; extend for your domain
+    - name: emails
+      pattern: "(?i)[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}"
+    - name: phones
+      pattern: "(?i)\+?\d[\d\s().-]{7,}\d"
+    - name: ssn
+      pattern: "(?i)\b\d{3}-\d{2}-\d{4}\b"
+guardrails:
+  refuse_external_if_index_empty: true
+  max_remote_questions_per_minute: 6
+  allowed_request_origins: []   # e.g., ["192.168.1.0/24"]

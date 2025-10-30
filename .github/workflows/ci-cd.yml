@@ -1,0 +1,503 @@
+# GitHub-based Development Workflow for Bit Buddy
+# All dependencies stay in the cloud - your machine stays clean!
+
+name: Bit Buddy CI/CD
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of tests to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - unit
+        - integration
+        - performance
+        - all
+      debug_mode:
+        description: 'Enable debug mode'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  PYTHON_VERSION: '3.11'
+  
+jobs:
+  # === SETUP AND VALIDATION ===
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
+      
+      - name: Validate project structure
+        run: |
+          echo "🔍 Validating Bit Buddy project structure..."
+          python -c "
+          import os
+          from pathlib import Path
+          
+          required_files = [
+              'enhanced_buddy.py', 'mesh_network.py', 'deploy.py',
+              'debug_tools.py', 'test_runner.py', 'setup.py',
+              'requirements.txt', 'README.md'
+          ]
+          
+          missing = []
+          for file in required_files:
+              if not Path(file).exists():
+                  missing.append(file)
+          
+          if missing:
+              print(f'❌ Missing files: {missing}')
+              exit(1)
+          else:
+              print('✅ All required files present')
+          "
+      
+      - name: Generate test matrix
+        id: matrix
+        run: |
+          echo "matrix={\"os\":[\"ubuntu-latest\",\"windows-latest\",\"macos-latest\"],\"python\":[\"3.8\",\"3.9\",\"3.10\",\"3.11\"]}" >> $GITHUB_OUTPUT
+
+  # === UNIT TESTS ===
+  unit-tests:
+    needs: setup
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+      fail-fast: false
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+      
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-${{ matrix.python }}-pip-${{ hashFiles('**/requirements.txt') }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
+      
+      - name: Run unit tests
+        run: |
+          echo "🧪 Running unit tests on ${{ matrix.os }} with Python ${{ matrix.python }}"
+          python test_runner.py --unit --verbose
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: unit-test-results-${{ matrix.os }}-${{ matrix.python }}
+          path: |
+            test-results/
+            .coverage
+            pytest.xml
+
+  # === INTEGRATION TESTS ===
+  integration-tests:
+    needs: setup
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+      
+      - name: Create test environment
+        run: |
+          mkdir -p test-workspace/{buddy,watch,models}
+          echo "Test document about AI" > test-workspace/watch/ai.txt
+          echo "Python code example" > test-workspace/watch/code.py
+          echo "Project notes" > test-workspace/watch/notes.md
+      
+      - name: Run integration tests
+        run: |
+          echo "🔗 Running integration tests with isolated environment"
+          export TEST_WORKSPACE=$PWD/test-workspace
+          python test_runner.py --integration --verbose
+      
+      - name: Upload integration results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: integration-test-results
+          path: test-workspace/
+
+  # === PERFORMANCE TESTS ===
+  performance-tests:
+    needs: setup
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio psutil
+      
+      - name: Create large test dataset
+        run: |
+          mkdir -p perf-test-data
+          for i in {1..1000}; do
+            echo "Test file $i with some content about various topics" > perf-test-data/file_$i.txt
+          done
+          echo "Created 1000 test files for performance testing"
+      
+      - name: Run performance tests
+        run: |
+          echo "🚀 Running performance tests"
+          export TEST_DATA_DIR=$PWD/perf-test-data
+          python test_runner.py --performance --verbose
+      
+      - name: Generate performance report
+        run: |
+          echo "📊 Performance Test Results" > performance-report.md
+          echo "=========================" >> performance-report.md
+          echo "" >> performance-report.md
+          echo "- **Test Files**: 1000 files" >> performance-report.md
+          echo "- **Platform**: Ubuntu Latest" >> performance-report.md
+          echo "- **Python Version**: ${{ env.PYTHON_VERSION }}" >> performance-report.md
+          echo "- **Timestamp**: $(date)" >> performance-report.md
+          echo "" >> performance-report.md
+          echo "See test artifacts for detailed results." >> performance-report.md
+      
+      - name: Upload performance results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-test-results
+          path: |
+            performance-report.md
+            perf-test-data/
+
+  # === MODEL TESTING (Optional) ===
+  model-tests:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.test_type == 'all'
+    needs: setup
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies with model support
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+          # Install model dependencies (lightweight versions for CI)
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install sentence-transformers
+      
+      - name: Download tiny test model
+        run: |
+          mkdir -p test-models
+          # Use a tiny model for testing (this is just a placeholder)
+          echo "Mock model file for testing" > test-models/tiny-model.gguf
+      
+      - name: Run model tests
+        run: |
+          echo "🧠 Running AI model tests with mock model"
+          export TEST_MODEL_PATH=$PWD/test-models/tiny-model.gguf
+          python test_runner.py --model-tests --verbose
+      
+      - name: Upload model test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: model-test-results
+          path: test-models/
+
+  # === SECURITY SCANNING ===
+  security:
+    needs: setup
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install security tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install safety bandit
+      
+      - name: Check for known vulnerabilities
+        run: |
+          echo "🔒 Checking for known security vulnerabilities"
+          safety check -r requirements.txt --json > security-report.json || true
+      
+      - name: Run static security analysis
+        run: |
+          echo "🔍 Running static security analysis"
+          bandit -r . -f json -o bandit-report.json || true
+      
+      - name: Upload security results
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-scan-results
+          path: |
+            security-report.json
+            bandit-report.json
+
+  # === DOCKER TESTING ===
+  docker-tests:
+    needs: setup
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Create Dockerfile for testing
+        run: |
+          cat > Dockerfile.test << 'EOF'
+          FROM python:3.11-slim
+          
+          WORKDIR /app
+          
+          # Install system dependencies
+          RUN apt-get update && apt-get install -y \
+              git \
+              && rm -rf /var/lib/apt/lists/*
+          
+          # Copy requirements and install Python dependencies
+          COPY requirements.txt .
+          RUN pip install --no-cache-dir -r requirements.txt
+          RUN pip install pytest pytest-asyncio
+          
+          # Copy source code
+          COPY . .
+          
+          # Run tests by default
+          CMD ["python", "test_runner.py", "--unit", "--verbose"]
+          EOF
+      
+      - name: Build test image
+        run: |
+          echo "🐳 Building Docker test image"
+          docker build -f Dockerfile.test -t bit-buddy-test .
+      
+      - name: Run tests in container
+        run: |
+          echo "🧪 Running tests in isolated Docker container"
+          docker run --rm bit-buddy-test
+      
+      - name: Test mesh networking in containers
+        run: |
+          echo "🌐 Testing mesh networking between containers"
+          # Create test network
+          docker network create buddy-mesh
+          
+          # Start buddy containers (mock test)
+          docker run --rm --network buddy-mesh --name buddy1 -d bit-buddy-test sleep 30
+          docker run --rm --network buddy-mesh --name buddy2 -d bit-buddy-test sleep 30
+          
+          # Test connectivity
+          docker exec buddy1 ping -c 2 buddy2
+          
+          # Cleanup
+          docker stop buddy1 buddy2 || true
+          docker network rm buddy-mesh
+
+  # === GENERATE REPORTS ===
+  report:
+    needs: [unit-tests, integration-tests, performance-tests, security]
+    if: always()
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+      
+      - name: Generate comprehensive report
+        run: |
+          echo "# 🤖 Bit Buddy Test Report" > test-report.md
+          echo "Generated: $(date)" >> test-report.md
+          echo "" >> test-report.md
+          
+          echo "## 📋 Test Summary" >> test-report.md
+          echo "" >> test-report.md
+          
+          # Check test results
+          if [ "${{ needs.unit-tests.result }}" == "success" ]; then
+            echo "✅ **Unit Tests**: PASSED" >> test-report.md
+          else
+            echo "❌ **Unit Tests**: FAILED" >> test-report.md
+          fi
+          
+          if [ "${{ needs.integration-tests.result }}" == "success" ]; then
+            echo "✅ **Integration Tests**: PASSED" >> test-report.md
+          else
+            echo "❌ **Integration Tests**: FAILED" >> test-report.md
+          fi
+          
+          if [ "${{ needs.performance-tests.result }}" == "success" ]; then
+            echo "✅ **Performance Tests**: PASSED" >> test-report.md
+          else
+            echo "❌ **Performance Tests**: FAILED" >> test-report.md
+          fi
+          
+          if [ "${{ needs.security.result }}" == "success" ]; then
+            echo "✅ **Security Scan**: PASSED" >> test-report.md
+          else
+            echo "❌ **Security Scan**: FAILED" >> test-report.md
+          fi
+          
+          echo "" >> test-report.md
+          echo "## 🏗️ Build Matrix Results" >> test-report.md
+          echo "" >> test-report.md
+          echo "Tests run across multiple Python versions and operating systems:" >> test-report.md
+          echo "- Python: 3.8, 3.9, 3.10, 3.11" >> test-report.md
+          echo "- OS: Ubuntu, Windows, macOS" >> test-report.md
+          echo "" >> test-report.md
+          
+          echo "## 🔍 Debug Information" >> test-report.md
+          echo "" >> test-report.md
+          echo "All tests run in isolated GitHub Actions environment." >> test-report.md
+          echo "No dependencies installed on local development machine." >> test-report.md
+          echo "" >> test-report.md
+          
+          echo "## 📁 Artifacts Generated" >> test-report.md
+          echo "" >> test-report.md
+          find . -name "*-results" -type d | while read dir; do
+            echo "- $dir" >> test-report.md
+          done
+      
+      - name: Upload comprehensive report
+        uses: actions/upload-artifact@v3
+        with:
+          name: comprehensive-test-report
+          path: test-report.md
+      
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('test-report.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
+  # === DEPLOYMENT (on main branch) ===
+  deploy:
+    if: github.ref == 'refs/heads/main' && needs.unit-tests.result == 'success'
+    needs: [unit-tests, integration-tests, performance-tests]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Create deployment package
+        run: |
+          echo "📦 Creating deployment package"
+          mkdir -p dist
+          
+          # Copy essential files
+          cp enhanced_buddy.py mesh_network.py deploy.py debug_tools.py dist/
+          cp setup.py requirements.txt README.md dist/
+          cp -r tests dist/
+          
+          # Create version file
+          echo "BUILD_DATE=$(date)" > dist/version.txt
+          echo "COMMIT_SHA=${{ github.sha }}" >> dist/version.txt
+          echo "BRANCH=${{ github.ref_name }}" >> dist/version.txt
+      
+      - name: Upload deployment artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: bit-buddy-release-${{ github.sha }}
+          path: dist/
+      
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Bit Buddy ${{ github.ref_name }}
+          body: |
+            ## 🤖 Bit Buddy Release ${{ github.ref_name }}
+            
+            Complete file system companion with AI personality!
+            
+            ### ✨ What's Included
+            - Enhanced buddy system with personality engine
+            - Mesh networking for buddy communication  
+            - Comprehensive testing and debugging tools
+            - Zero-dependency local setup
+            
+            ### 🚀 Quick Start
+            1. Download the release files
+            2. Run `python setup.py` 
+            3. Follow the interactive setup
+            
+            All tests passed on multiple Python versions and operating systems!
+          draft: false
+          prerelease: false

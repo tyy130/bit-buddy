@@ -1,0 +1,26 @@
+# custodian/manifest.yaml
+id: "custodian-${RANDOM}"           # replace with a stable ID you choose
+name: "Unassigned Custodian"
+owner: "Blueprint Dynamics"
+created_utc: "2025-10-30T02:20:17Z"
+version: "0.1.0"
+llm_stick_version: "0.1.0"
+models:
+  generator:
+    provider: "llamacpp"            # or "ollama"
+    model_ref: "models/phi-3-mini-4k-instruct.Q4_K_M.gguf"
+  embedder:
+    name: "bge-small-en"
+    dim: 384
+storage:
+  kb_dir: "kb"
+  index_dir: "index"
+  models_dir: "models"
+mesh:
+  port: 11500
+  peers_file: "custodian/peers.json"
+  policy_file: "custodian/policy.yaml"
+security:
+  key_file: "custodian/secret.key"
+  hmac_alg: "sha256"
+  require_signed_requests: true

@@ -1,0 +1,74 @@
+{
+  // GitHub Codespaces Configuration for Bit Buddy Development
+  // Provides a complete cloud development environment - no local dependencies!
+  "name": "Bit Buddy Development",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.pylint", 
+        "ms-python.flake8",
+        "ms-python.black-formatter",
+        "ms-toolsai.jupyter",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "ms-python.debugpy",
+        "wholroyd.jinja",
+        "redhat.vscode-yaml",
+        "ms-vscode.test-adapter-converter",
+        "littlefoxteam.vscode-python-test-adapter"
+      ],
+      
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true,
+        "python.formatting.provider": "black",
+        "python.testing.pytestEnabled": true,
+        "python.testing.pytestArgs": ["tests/"],
+        "files.watcherExclude": {
+          "**/node_modules/**": true,
+          "**/.git/**": true,
+          "**/.pytest_cache/**": true,
+          "**/__pycache__/**": true
+        },
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+  
+  "forwardPorts": [8000, 8001, 8002, 8003],
+  "portsAttributes": {
+    "8000": {
+      "label": "Bit Buddy Main Server",
+      "onAutoForward": "notify"
+    },
+    "8001": {
+      "label": "Buddy Mesh Network 1", 
+      "onAutoForward": "silent"
+    },
+    "8002": {
+      "label": "Buddy Mesh Network 2",
+      "onAutoForward": "silent" 
+    },
+    "8003": {
+      "label": "Debug Server",
+      "onAutoForward": "silent"
+    }
+  },
+  
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  
+  "remoteUser": "vscode",
+  
+  "mounts": [
+    "source=${localWorkspaceFolder}/.devcontainer/workspace-data,target=/workspaces/data,type=bind,consistency=cached"
+  ]
+}
