@@ -92,6 +92,17 @@ jobs:
             build/installer/**/*.exe
           retention-days: 30
 
+      - name: Build Windows portable (traveler)
+        run: |
+          pyinstaller build/config/buddy_traveler.spec --clean --noconfirm
+
+      - name: Upload Windows portable bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: bit-buddy-windows-portable
+          path: dist/BitBuddy-Portable
+          retention-days: 30
+
   build-linux:
     runs-on: ubuntu-latest
     steps:
@@ -119,18 +130,22 @@ jobs:
           python -c "from enhanced_buddy import EnhancedBitBuddy; print('Core imports successful')"
           python -c "import buddy_gui; print('GUI imports successful')"
 
-      - name: Build Linux executable
+      - name: Build Linux executable (onedir)
         run: |
           pyinstaller build/config/buddy.spec --clean --noconfirm
 
       - name: Test executable
         run: |
-          if [ -f "dist/bit-buddy" ]; then
-            echo "Executable created successfully"
-            # Make it executable
-            chmod +x dist/bit-buddy
+          if [ -d "dist/bit-buddy" ]; then
+            echo "Onedir bundle created successfully"
+            if [ -f "dist/bit-buddy/bit-buddy" ]; then
+              chmod +x dist/bit-buddy/bit-buddy
+              echo "Executable present inside bundle"
+            else
+              echo "WARNING: Executable not found inside onedir bundle"
+            fi
           else
-            echo "ERROR: Executable not found"
+            echo "ERROR: Bundle directory not found"
             exit 1
           fi
 
@@ -139,6 +154,17 @@ jobs:
         with:
           name: bit-buddy-linux
           path: dist/bit-buddy
+          retention-days: 30
+
+      - name: Build Linux portable (traveler)
+        run: |
+          pyinstaller build/config/buddy_traveler.spec --clean --noconfirm
+
+      - name: Upload Linux portable bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: bit-buddy-linux-portable
+          path: dist/bit-buddy-portable
           retention-days: 30
 
   build-macos:
@@ -196,6 +222,26 @@ jobs:
             dist/BitBuddy.dmg
           retention-days: 30
 
+      - name: Build macOS portable (traveler)
+        run: |
+          pyinstaller build/config/buddy_traveler.spec --clean --noconfirm
+
+      - name: Package macOS portable zip
+        run: |
+          if [ -d "dist/BitBuddy-Portable" ]; then
+            cd dist
+            zip -r BitBuddy-Portable-macOS.zip BitBuddy-Portable
+          fi
+
+      - name: Upload macOS portable bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: bit-buddy-macos-portable
+          path: |
+            dist/BitBuddy-Portable
+            dist/BitBuddy-Portable-macOS.zip
+          retention-days: 30
+
   create-release:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [build-windows, build-linux, build-macos]
@@ -209,8 +255,11 @@ jobs:
         with:
           files: |
             bit-buddy-windows/BitBuddy.exe
-            bit-buddy-linux/bit-buddy
+            bit-buddy-linux/**
             bit-buddy-macos/BitBuddy.dmg
+            bit-buddy-windows-portable/**
+            bit-buddy-linux-portable/**
+            bit-buddy-macos-portable/**
           body: |
             ## Bit Buddy Desktop Application
 

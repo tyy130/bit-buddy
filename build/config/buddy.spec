@@ -57,10 +57,7 @@ a = Analysis(
         'fastembed',
         'fastembed.text',
         'fastembed.text.text_embedding',
-        'sentence_transformers',
-        'chromadb',
         'numpy',
-        'torch',
 
         # Document processing
         'pypdf',
@@ -90,6 +87,12 @@ a = Analysis(
         'pytest',
         'IPython',
         'jupyter',
+        # Exclude heavy ML stacks for smaller default build;
+        # app gracefully degrades when these are missing
+        'torch',
+        'transformers',
+        'sentence_transformers',
+        'chromadb',
     ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
@@ -137,4 +140,16 @@ if sys.platform == 'darwin':
             'NSHighResolutionCapable': 'True',
             'LSMinimumSystemVersion': '10.13.0',
         },
+    )
+
+# Linux-specific: produce onedir to reduce temp disk pressure and size issues
+if sys.platform.startswith('linux'):
+    coll = COLLECT(
+        exe,
+        a.binaries,
+        a.zipfiles,
+        a.datas,
+        strip=False,
+        upx=True,
+        name=name,
     )
