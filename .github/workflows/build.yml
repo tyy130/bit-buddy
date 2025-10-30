@@ -43,8 +43,8 @@ jobs:
 
       - name: Run pre-build tests
         run: |
-          python -c "from enhanced_buddy import EnhancedBitBuddy; print('✅ Core imports successful')"
-          python -c "import buddy_gui; print('✅ GUI imports successful')"
+          python -c "from enhanced_buddy import EnhancedBitBuddy; print('Core imports successful')"
+          python -c "import buddy_gui; print('GUI imports successful')"
 
       - name: Build Windows executable
         run: |
@@ -63,7 +63,7 @@ jobs:
         run: |
           # Basic test - just check if executable was created and can start
           if (Test-Path "dist/BitBuddy.exe") {
-            echo "✅ Executable created successfully"
+            echo "Executable created successfully"
             # Quick smoke test (will fail without display but that's expected)
             try {
               & "./dist/BitBuddy.exe" --help 2>$null
@@ -71,7 +71,7 @@ jobs:
               echo "Expected - GUI app requires display"
             }
           } else {
-            echo "❌ Executable not found"
+            echo "ERROR: Executable not found"
             exit 1
           }
 
@@ -116,8 +116,8 @@ jobs:
 
       - name: Run pre-build tests
         run: |
-          python -c "from enhanced_buddy import EnhancedBitBuddy; print('✅ Core imports successful')"
-          python -c "import buddy_gui; print('✅ GUI imports successful')"
+          python -c "from enhanced_buddy import EnhancedBitBuddy; print('Core imports successful')"
+          python -c "import buddy_gui; print('GUI imports successful')"
 
       - name: Build Linux executable
         run: |
@@ -126,11 +126,11 @@ jobs:
       - name: Test executable
         run: |
           if [ -f "dist/bit-buddy" ]; then
-            echo "✅ Executable created successfully"
+            echo "Executable created successfully"
             # Make it executable
             chmod +x dist/bit-buddy
           else
-            echo "❌ Executable not found"
+            echo "ERROR: Executable not found"
             exit 1
           fi
 
@@ -160,8 +160,8 @@ jobs:
 
       - name: Run pre-build tests
         run: |
-          python -c "from enhanced_buddy import EnhancedBitBuddy; print('✅ Core imports successful')"
-          python -c "import buddy_gui; print('✅ GUI imports successful')"
+          python -c "from enhanced_buddy import EnhancedBitBuddy; print('Core imports successful')"
+          python -c "import buddy_gui; print('GUI imports successful')"
 
       - name: Build macOS application
         run: |
@@ -170,9 +170,9 @@ jobs:
       - name: Test application bundle
         run: |
           if [ -d "dist/BitBuddy.app" ]; then
-            echo "✅ Application bundle created successfully"
+            echo "Application bundle created successfully"
           else
-            echo "❌ Application bundle not found"
+            echo "ERROR: Application bundle not found"
             exit 1
           fi
 
@@ -184,7 +184,7 @@ jobs:
             cp -R dist/BitBuddy.app dist/dmg/
             ln -s /Applications dist/dmg/
             hdiutil create -volname "Bit Buddy" -srcfolder dist/dmg -ov -format UDZO dist/BitBuddy.dmg
-            echo "✅ DMG created"
+            echo "DMG created"
           fi
 
       - name: Upload macOS application

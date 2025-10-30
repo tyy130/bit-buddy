@@ -5,10 +5,12 @@ Builds standalone executable for Windows, macOS, and Linux
 """
 
 import sys
+import os
 from pathlib import Path
 
-# Resolve project root (repo root is two levels up from this spec file)
-ROOT = Path(__file__).resolve().parents[2]
+# Resolve project root - use SPECPATH which PyInstaller provides
+# SPECPATH is the directory containing this spec file (build/config)
+ROOT = Path(SPECPATH).resolve().parents[1]
 
 block_cipher = None
 
