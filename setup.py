@@ -1,11 +1,20 @@
 #!/usr/bin/env python3
 """
 Bit Buddy Quick Setup - Get your first digital companion running in minutes!
+
+This script automatically creates a virtual environment and installs dependencies,
+avoiding issues with externally-managed Python environments (PEP 668).
 """
 
 import subprocess
 import sys
+import venv
 from pathlib import Path
+
+
+# Directory where this script lives
+SCRIPT_DIR = Path(__file__).parent.resolve()
+VENV_DIR = SCRIPT_DIR / "venv"
 
 
 def print_banner():
@@ -42,28 +51,81 @@ def check_python_version():
     return True
 
 
-def install_dependencies():
-    """Install required dependencies"""
-    print("\n📦 Installing dependencies...")
+def get_venv_python():
+    """Get the path to the Python executable in the venv"""
+    if sys.platform == "win32":
+        return VENV_DIR / "Scripts" / "python.exe"
+    return VENV_DIR / "bin" / "python"
 
-    requirements_file = Path(__file__).parent / "requirements.txt"
+
+def get_venv_pip():
+    """Get the path to the pip executable in the venv"""
+    if sys.platform == "win32":
+        return VENV_DIR / "Scripts" / "pip.exe"
+    return VENV_DIR / "bin" / "pip"
+
+
+def create_virtual_environment():
+    """Create a virtual environment if it doesn't exist"""
+    if VENV_DIR.exists() and get_venv_python().exists():
+        print(f"✅ Virtual environment already exists at: {VENV_DIR}")
+        return True
+
+    print(f"\n🔧 Creating virtual environment at: {VENV_DIR}")
+    try:
+        # Create virtual environment with pip
+        venv.create(VENV_DIR, with_pip=True, clear=True)
+        print("✅ Virtual environment created successfully!")
+        return True
+    except Exception as e:
+        print(f"❌ Failed to create virtual environment: {e}")
+        print("   Try running manually: python3 -m venv venv")
+        return False
+
+
+def install_dependencies():
+    """Install required dependencies into the virtual environment"""
+    print("\n📦 Installing dependencies into virtual environment...")
+
+    requirements_file = SCRIPT_DIR / "requirements.txt"
+    venv_pip = get_venv_pip()
+
+    if not venv_pip.exists():
+        print(f"❌ pip not found at: {venv_pip}")
+        return False
 
     try:
+        # Upgrade pip first
         subprocess.check_call(
             [
-                sys.executable,
+                str(get_venv_python()),
+                "-m",
+                "pip",
+                "install",
+                "--upgrade",
+                "pip",
+            ],
+            cwd=SCRIPT_DIR,
+        )
+
+        # Install requirements
+        subprocess.check_call(
+            [
+                str(get_venv_python()),
                 "-m",
                 "pip",
                 "install",
                 "-r",
                 str(requirements_file),
-            ]
+            ],
+            cwd=SCRIPT_DIR,
         )
         print("✅ Dependencies installed successfully!")
         return True
     except subprocess.CalledProcessError as e:
         print(f"❌ Failed to install dependencies: {e}")
-        print("   Try running manually: pip install -r requirements.txt")
+        print("   Try running manually:")
+        print(f"   {venv_pip} install -r requirements.txt")
         return False
 
 
@@ -292,6 +354,8 @@ if __name__ == "__main__":
 
 def show_next_steps(buddy_name):
     """Show what to do next"""
+    venv_activate = "source venv/bin/activate" if sys.platform != "win32" else "venv\\Scripts\\activate"
+    start_cmd = "./start.sh" if sys.platform != "win32" else "start.bat"
     print(
         f"""
 🎉 =============================================== 🎉
@@ -299,9 +363,13 @@ def show_next_steps(buddy_name):
 🎉 =============================================== 🎉
 
 🚀 QUICK START:
-   python start_buddy.py
+   {start_cmd}                    # Recommended - auto-activates venv
 
-🛠️  ADVANCED MANAGEMENT:
+📦 VIRTUAL ENVIRONMENT:
+   A virtual environment was created at: ./venv
+   To manually activate: {venv_activate}
+
+🛠️  ADVANCED MANAGEMENT (activate venv first, or use start.sh):
    python deploy.py list-buddies           # See all your buddies
    python deploy.py start-buddy {buddy_name}      # Start in background
    python deploy.py health                 # System health check
@@ -340,10 +408,18 @@ def main():
     if not check_python_version():
         return 1
 
+    # Create virtual environment first
+    if not create_virtual_environment():
+        return 1
+
+    # Install dependencies into the venv
+    if not install_dependencies():
+        return 1
+
     # Check if already setup
     buddy_dir = Path.home() / ".bit_buddies"
     if buddy_dir.exists() and any(buddy_dir.glob("buddies/*/config.json")):
-        print("🔍 Existing bit buddy installation found!")
+        print("\n🔍 Existing bit buddy installation found!")
         print(f"   Location: {buddy_dir}")
 
         response = input(
@@ -351,13 +427,9 @@ def main():
         ).lower()
         if response not in ["y", "yes"]:
             print(
-                "\n💡 Use 'python deploy.py list-buddies' to see existing buddies"
+                "\n💡 Use './start.sh' or 'python deploy.py list-buddies' to see existing buddies"
             )
             return 0
-
-    # Install dependencies
-    if not install_dependencies():
-        return 1
 
     # Create demo directories
     demo_dirs = create_example_directories()
