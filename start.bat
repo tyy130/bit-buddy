@@ -21,8 +21,28 @@ if not exist "%VENV_DIR%" (
     exit /b 1
 )
 
+REM Check if activate script exists
+if not exist "%VENV_DIR%\Scripts\activate.bat" (
+    echo ❌ Virtual environment appears corrupted (activate script missing)
+    echo.
+    echo Please re-run setup:
+    echo   rmdir /s /q venv
+    echo   python setup.py
+    exit /b 1
+)
+
 REM Activate virtual environment
 call "%VENV_DIR%\Scripts\activate.bat"
+
+REM Verify activation worked by checking VIRTUAL_ENV is set
+if "%VIRTUAL_ENV%"=="" (
+    echo ❌ Failed to activate virtual environment
+    echo.
+    echo Please try re-running setup:
+    echo   rmdir /s /q venv
+    echo   python setup.py
+    exit /b 1
+)
 
 REM Check if start_buddy.py exists (created after full interactive setup)
 if exist "%SCRIPT_DIR%start_buddy.py" (

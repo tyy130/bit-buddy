@@ -67,14 +67,51 @@ def get_venv_pip():
 
 def create_virtual_environment():
     """Create a virtual environment if it doesn't exist"""
-    if VENV_DIR.exists() and get_venv_python().exists():
-        print(f"✅ Virtual environment already exists at: {VENV_DIR}")
-        return True
+    venv_python = get_venv_python()
+    venv_pip = get_venv_pip()
+
+    if VENV_DIR.exists() and venv_python.exists() and venv_pip.exists():
+        # Verify the venv is functional by checking pip works
+        try:
+            result = subprocess.run(
+                [str(venv_python), "-m", "pip", "--version"],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            if result.returncode == 0:
+                print(f"✅ Virtual environment already exists at: {VENV_DIR}")
+                return True
+            # If pip check fails, recreate the venv
+            print("⚠️  Existing virtual environment appears corrupted, recreating...")
+        except (subprocess.TimeoutExpired, Exception):
+            print("⚠️  Existing virtual environment appears corrupted, recreating...")
 
     print(f"\n🔧 Creating virtual environment at: {VENV_DIR}")
     try:
         # Create virtual environment with pip
         venv.create(VENV_DIR, with_pip=True, clear=True)
+
+        # Verify the venv was created successfully
+        if not venv_python.exists():
+            print(f"❌ Python not found at expected location: {venv_python}")
+            return False
+
+        if not venv_pip.exists():
+            print(f"❌ pip not found at expected location: {venv_pip}")
+            return False
+
+        # Verify pip is functional
+        result = subprocess.run(
+            [str(venv_python), "-m", "pip", "--version"],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        if result.returncode != 0:
+            print(f"❌ pip verification failed: {result.stderr}")
+            return False
+
         print("✅ Virtual environment created successfully!")
         return True
     except Exception as e:
@@ -89,10 +126,6 @@ def install_dependencies():
 
     requirements_file = SCRIPT_DIR / "requirements.txt"
     venv_pip = get_venv_pip()
-
-    if not venv_pip.exists():
-        print(f"❌ pip not found at: {venv_pip}")
-        return False
 
     try:
         # Upgrade pip first

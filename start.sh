@@ -21,8 +21,26 @@ if [ ! -d "$VENV_DIR" ]; then
     exit 1
 fi
 
+# Check if activate script exists
+if [ ! -f "$VENV_DIR/bin/activate" ]; then
+    echo "❌ Virtual environment appears corrupted (activate script missing)"
+    echo ""
+    echo "Please re-run setup:"
+    echo "  rm -rf venv && python3 setup.py"
+    exit 1
+fi
+
 # Activate virtual environment
 source "$VENV_DIR/bin/activate"
+
+# Verify activation worked by checking VIRTUAL_ENV is set
+if [ -z "$VIRTUAL_ENV" ]; then
+    echo "❌ Failed to activate virtual environment"
+    echo ""
+    echo "Please try re-running setup:"
+    echo "  rm -rf venv && python3 setup.py"
+    exit 1
+fi
 
 # Check if start_buddy.py exists (created after full interactive setup)
 if [ -f "$SCRIPT_DIR/start_buddy.py" ]; then
