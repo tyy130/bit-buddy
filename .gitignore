@@ -25,6 +25,12 @@ ENV/
 env/
 .venv
 
+# Generated startup scripts (user-specific)
+start_buddy.py
+
+# Environment configuration (user-specific, use .env.example as template)
+.env
+
 # IDE
 .vscode/*
 !.vscode/extensions.json

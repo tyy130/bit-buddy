@@ -77,42 +77,59 @@ Choose from four unique starter characters, each with their own personality:
 
 ### Option B: Developer Setup (Full Control)
 
+The setup script automatically creates a virtual environment (avoiding PEP 668 issues on modern Python 3.12+ systems) and installs all dependencies.
+
 ```bash
-# 1. Clone and setup
+# 1. Clone and setup (auto-creates venv)
 git clone <repository>
 cd bit-buddy
-python setup.py
+python3 setup.py
 
 # 2. Follow the interactive setup
+# - Creates virtual environment automatically
+# - Installs all dependencies
 # - Downloads AI model (~900MB)
 # - Creates your first buddy
 # - Sets up demo files
 
-# 3. Start your buddy
-python start_buddy.py
+# 3. Start your buddy (auto-activates venv)
+./start.sh        # Unix/macOS
+# or
+start.bat         # Windows
 
 # 4. Chat with your new companion!
 💭 Ask your buddy: What files do you see?
 🤖 Pixel: I see some interesting documents here! There's a welcome.txt that seems excited to meet me, and a README.md that explains what I can do. I'm curious about that BitBuddy_Projects folder - are you working on something creative? 
 ```
 
-### Option B: RAG Service Only (Production API)
+**Virtual Environment Notes:**
+- The venv is created automatically at `./venv`
+- Use `./start.sh` or `start.bat` to auto-activate the venv
+- For manual activation:
+  - Unix/macOS: `source venv/bin/activate`
+  - Windows: `venv\Scripts\activate`
+
+### Option C: RAG Service Only (Production API)
 
 For deploying just the RAG API service without the personality layer:
 
 ```bash
-# 1. Install dependencies
-pip install -r requirements.txt
+# 1. Setup with auto-venv (recommended)
+python3 setup.py    # Creates venv and installs deps
 
 # 2. Configure your knowledge base
 mkdir -p kb
 # Add your .txt, .md, .pdf, or .docx files to kb/
 
-# 3. Update app/config.yaml
-# - Set your LLM provider (llamacpp or ollama)
-# - Configure embedding model (default: BAAI/bge-small-en-v1.5)
+# 3. (Optional) Copy and customize environment variables
+cp .env.example .env
+# Edit .env to set LLM provider, embedding model, etc.
 
-# 4. Start the RAG service
+# 4. Start the RAG service (auto-activates venv)
+./start.sh
+
+# Or manually with venv activated:
+source venv/bin/activate
 uvicorn app.server:app --host 127.0.0.1 --port 8000
 
 # 5. Check health
@@ -428,6 +445,18 @@ ollama pull qwen2.5:1.5b-instruct
 # Then verify config in app/config.yaml matches your setup
 ```
 
+**"externally-managed-environment" error (PEP 668)**
+```bash
+# This is solved automatically by setup.py which creates a virtual environment
+# Simply run:
+python3 setup.py
+
+# The script will:
+# 1. Create a venv at ./venv
+# 2. Install all dependencies into the venv
+# 3. Create start.sh/start.bat scripts to auto-activate the venv
+```
+
 **"Python not found" / "Dependencies missing"**
 ```bash
 # Use GitHub Codespaces instead - zero setup required
@@ -509,11 +538,14 @@ We welcome contributions! Your buddy wants friends to help it grow:
 git clone <repository>
 cd bit-buddy
 
-## 🐛 Troubleshooting
+# Run setup (auto-creates venv and installs deps)
+python3 setup.py
 
-### Start → Reindex → Query (quick example)
+# Or manually create venv and install dev dependencies
+python3 -m venv venv
+source venv/bin/activate  # Unix/macOS
+# venv\Scripts\activate   # Windows
 
-# Install dev dependencies  
 pip install -r requirements.txt
 pip install pytest pytest-asyncio
 
@@ -544,4 +576,4 @@ Bit Buddy was inspired by:
 
 Made with 💖 for humans who believe their digital life deserves a caring companion.
 
-**Start your journey**: `python setup.py` 🚀
+**Start your journey**: `python3 setup.py && ./start.sh` 🚀
