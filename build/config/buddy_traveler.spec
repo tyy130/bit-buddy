@@ -72,13 +72,12 @@ a = Analysis(
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
+# For onedir builds (portable), exclude binaries/datas from EXE and include them in COLLECT
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
     [],
+    exclude_binaries=True,
     name=name,
     debug=False,
     bootloader_ignore_signals=False,
@@ -103,5 +102,6 @@ coll = COLLECT(
     a.datas,
     strip=False,
     upx=True,
+    upx_exclude=[],
     name=name,
 )

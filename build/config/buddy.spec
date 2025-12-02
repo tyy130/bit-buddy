@@ -102,28 +102,66 @@ a = Analysis(
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
-exe = EXE(
-    pyz,
-    a.scripts,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
-    [],
-    name=name,
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
-    console=False,  # No console window on Windows
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
-    icon=icon_file if (icon_file and Path(icon_file).exists()) else None,
-)
+# For Linux, use onedir mode (exclude binaries/datas from EXE, include in COLLECT)
+# For Windows/macOS, use onefile mode (include everything in EXE)
+if sys.platform.startswith('linux'):
+    # Linux: onedir build - EXE contains only scripts
+    exe = EXE(
+        pyz,
+        a.scripts,
+        [],
+        exclude_binaries=True,
+        name=name,
+        debug=False,
+        bootloader_ignore_signals=False,
+        strip=False,
+        upx=True,
+        upx_exclude=[],
+        runtime_tmpdir=None,
+        console=False,
+        disable_windowed_traceback=False,
+        argv_emulation=False,
+        target_arch=None,
+        codesign_identity=None,
+        entitlements_file=None,
+        icon=icon_file if (icon_file and Path(icon_file).exists()) else None,
+    )
+
+    # Linux COLLECT: gather all files into directory bundle
+    coll = COLLECT(
+        exe,
+        a.binaries,
+        a.zipfiles,
+        a.datas,
+        strip=False,
+        upx=True,
+        upx_exclude=[],
+        name=name,
+    )
+else:
+    # Windows/macOS: onefile build - everything in EXE
+    exe = EXE(
+        pyz,
+        a.scripts,
+        a.binaries,
+        a.zipfiles,
+        a.datas,
+        [],
+        name=name,
+        debug=False,
+        bootloader_ignore_signals=False,
+        strip=False,
+        upx=True,
+        upx_exclude=[],
+        runtime_tmpdir=None,
+        console=False,  # No console window on Windows
+        disable_windowed_traceback=False,
+        argv_emulation=False,
+        target_arch=None,
+        codesign_identity=None,
+        entitlements_file=None,
+        icon=icon_file if (icon_file and Path(icon_file).exists()) else None,
+    )
 
 # macOS-specific app bundle
 if sys.platform == 'darwin':
@@ -140,16 +178,4 @@ if sys.platform == 'darwin':
             'NSHighResolutionCapable': 'True',
             'LSMinimumSystemVersion': '10.13.0',
         },
-    )
-
-# Linux-specific: produce onedir to reduce temp disk pressure and size issues
-if sys.platform.startswith('linux'):
-    coll = COLLECT(
-        exe,
-        a.binaries,
-        a.zipfiles,
-        a.datas,
-        strip=False,
-        upx=True,
-        name=name,
     )
