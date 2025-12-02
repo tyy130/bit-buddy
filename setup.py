@@ -227,7 +227,7 @@ def setup_first_buddy(demo_dirs):
 
     # Import deployment manager
     try:
-        sys.path.insert(0, str(Path(__file__).parent))
+        sys.path.insert(0, str(Path(__file__).parent / "tools"))
         from deploy import BuddyDeploymentManager
 
         manager = BuddyDeploymentManager()
