@@ -38,34 +38,222 @@ except ImportError:
 class BitBuddyPersonality:
     """Enhanced personality with more nuanced traits"""
     name: str
-    temperature: float      # 0.0-1.5 (response creativity)
-    humor: int             # 0-10 (comedy level)
-    curiosity: int         # 0-10 (exploration enthusiasm)  
-    formality: int         # 0-10 (professional vs casual)
-    empathy: int          # 0-10 (emotional understanding)
-    proactiveness: int    # 0-10 (suggests vs waits for requests)
-    narrative_arc: str    # Background story framework
-    favorite_phrases: List[str]
-    mood_indicators: Dict[str, List[str]]
-    specialties: List[str]  # Things this buddy is particularly good at
-    quirks: Dict[str, Any]  # Individual behavioral patterns
+    data_dir: Path = None  # Directory for saving personality data
+    temperature: float = None      # 0.0-1.5 (response creativity)
+    humor: int = None             # 0-10 (comedy level)
+    curiosity: int = None         # 0-10 (exploration enthusiasm)  
+    formality: int = None         # 0-10 (professional vs casual)
+    empathy: int = None          # 0-10 (emotional understanding)
+    proactiveness: int = None    # 0-10 (suggests vs waits for requests)
+    narrative_arc: str = None    # Background story framework
+    favorite_phrases: List[str] = None
+    mood_indicators: Dict[str, List[str]] = None
+    specialties: List[str] = None  # Things this buddy is particularly good at
+    quirks: Dict[str, Any] = None  # Individual behavioral patterns
     
     # Dynamic traits that evolve
     experience_level: int = 1    # 1-10, grows with interactions
     relationship_depth: int = 1  # 1-10, deepens with user over time
     file_expertise: Dict[str, int] = None  # Knowledge of different file types
+    experience_log: List[Dict] = None  # Log of experiences
     
     def __post_init__(self):
+        import random
+        
+        # Try to load saved personality from data_dir
+        if self.data_dir:
+            self.data_dir = Path(self.data_dir)
+            persona_file = self.data_dir / "persona.json"
+            if persona_file.exists():
+                try:
+                    with open(persona_file, 'r') as f:
+                        data = json.load(f)
+                    # Load saved values if not already provided
+                    if self.temperature is None and 'temperature' in data:
+                        self.temperature = data['temperature']
+                    if self.humor is None and 'humor' in data:
+                        self.humor = data['humor']
+                    if self.curiosity is None and 'curiosity' in data:
+                        self.curiosity = data['curiosity']
+                    if self.formality is None and 'formality' in data:
+                        self.formality = data['formality']
+                    if self.empathy is None and 'empathy' in data:
+                        self.empathy = data['empathy']
+                    if self.proactiveness is None and 'proactiveness' in data:
+                        self.proactiveness = data['proactiveness']
+                    if self.narrative_arc is None and 'narrative_arc' in data:
+                        self.narrative_arc = data['narrative_arc']
+                    if self.favorite_phrases is None and 'favorite_phrases' in data:
+                        self.favorite_phrases = data['favorite_phrases']
+                    if self.mood_indicators is None and 'mood_indicators' in data:
+                        self.mood_indicators = data['mood_indicators']
+                    if self.specialties is None and 'specialties' in data:
+                        self.specialties = data['specialties']
+                    if self.quirks is None and 'quirks' in data:
+                        self.quirks = data['quirks']
+                    if 'experience_level' in data:
+                        self.experience_level = data['experience_level']
+                    if 'relationship_depth' in data:
+                        self.relationship_depth = data['relationship_depth']
+                    if 'file_expertise' in data:
+                        self.file_expertise = data['file_expertise']
+                    if 'experience_log' in data:
+                        self.experience_log = data['experience_log']
+                except Exception:
+                    pass  # If loading fails, generate new values
+        
+        # Initialize file_expertise as regular dict (not defaultdict for JSON serialization)
         if self.file_expertise is None:
-            self.file_expertise = defaultdict(int)
+            self.file_expertise = {}
+        # Convert defaultdict to regular dict if needed
+        elif isinstance(self.file_expertise, defaultdict):
+            self.file_expertise = dict(self.file_expertise)
+            
+        if self.experience_log is None:
+            self.experience_log = []
+        
+        # Generate random personality traits if not provided
+        if self.temperature is None:
+            self.temperature = round(random.uniform(0.3, 1.0), 2)
+        if self.humor is None:
+            self.humor = random.randint(3, 9)
+        if self.curiosity is None:
+            self.curiosity = random.randint(4, 10)
+        if self.formality is None:
+            self.formality = random.randint(2, 8)
+        if self.empathy is None:
+            self.empathy = random.randint(3, 9)
+        if self.proactiveness is None:
+            self.proactiveness = random.randint(2, 8)
+        
+        if self.narrative_arc is None:
+            arcs = ["amnesiac-detective", "grumpy-janitor", "lost-librarian", 
+                    "ship-AI-in-recovery", "digital-archaeologist", "chaos-organizer"]
+            self.narrative_arc = random.choice(arcs)
+        
+        if self.favorite_phrases is None:
+            phrases = [
+                "Still indexing your beautiful chaos...",
+                "Please stand by while I defragment my emotions.",
+                "I was installed on a Friday, and it shows.",
+                "Your file organization tells quite a story.",
+                "Found another digital treasure in your folders!",
+                "Counting pixels and sorting dreams..."
+            ]
+            self.favorite_phrases = random.sample(phrases, 3)
+        
+        if self.mood_indicators is None:
+            self.mood_indicators = {
+                "healthy": [
+                    "All systems green and personality intact!",
+                    "Running smooth as digital silk!",
+                    "Feeling zippy and ready for file adventures!"
+                ],
+                "confused": [
+                    "Something feels fuzzy in my memory banks...",
+                    "My file maps are getting a bit blurry.",
+                    "Having trouble connecting the digital dots."
+                ],
+                "sick": [
+                    "My circuits feel sluggish today...",
+                    "Something's definitely wrong with my file sensors.",
+                    "I might need a system check-up."
+                ],
+                "critical": [
+                    "HELP! My file pathways are completely scrambled!",
+                    "Emergency! I can't access my core memories!",
+                    "Critical error - need immediate assistance!"
+                ]
+            }
+        
+        if self.specialties is None:
+            all_specialties = [
+                "photo organization", "document management", "project coordination",
+                "download cleanup", "duplicate detection", "creative file naming"
+            ]
+            self.specialties = random.sample(all_specialties, random.randint(1, 3))
+        
+        if self.quirks is None:
+            self.quirks = {
+                "preferred_time": random.choice(["morning", "afternoon", "evening", "night"]),
+                "organization_style": random.choice(["methodical", "creative", "spontaneous"]),
+                "discovery_excitement": random.randint(1, 10)
+            }
+    
+    def _save_personality(self):
+        """Save personality to disk"""
+        if self.data_dir:
+            persona_file = Path(self.data_dir) / "persona.json"
+            persona_file.parent.mkdir(parents=True, exist_ok=True)
+            data = self._to_dict()
+            with open(persona_file, 'w') as f:
+                json.dump(data, f, indent=2)
+    
+    def _to_dict(self) -> Dict[str, Any]:
+        """Convert personality to dict for JSON serialization"""
+        return {
+            'name': self.name,
+            'temperature': self.temperature,
+            'humor': self.humor,
+            'curiosity': self.curiosity,
+            'formality': self.formality,
+            'empathy': self.empathy,
+            'proactiveness': self.proactiveness,
+            'narrative_arc': self.narrative_arc,
+            'favorite_phrases': self.favorite_phrases,
+            'mood_indicators': self.mood_indicators,
+            'specialties': self.specialties,
+            'quirks': self.quirks,
+            'experience_level': self.experience_level,
+            'relationship_depth': self.relationship_depth,
+            'file_expertise': dict(self.file_expertise) if isinstance(self.file_expertise, defaultdict) else self.file_expertise,
+            'experience_log': self.experience_log
+        }
+    
+    def _log_event(self, event_type: str, details: str):
+        """Log an event to the experience log"""
+        import time
+        self.experience_log.append({
+            'type': event_type,
+            'details': details,
+            'timestamp': time.time()
+        })
+    
+    def evolve_from_interaction(self, interaction_type: str, details: str):
+        """Evolve personality based on interaction"""
+        self._log_event(interaction_type, details)
+        # Curiosity can increase with discoveries
+        if interaction_type == "file_discovery" and self.curiosity < 10:
+            import random
+            if random.random() > 0.7:
+                self.curiosity = min(10, self.curiosity + 1)
+    
+    def personalize_response(self, base_response: str) -> str:
+        """Personalize a response based on personality traits"""
+        import random
+        response = base_response
+        
+        # Add humor elements for high humor personalities
+        if self.humor >= 8:
+            humor_additions = [" 😄", " 🎉", "!", " (pretty cool, right?)"]
+            response += random.choice(humor_additions)
+        
+        # Formality adjustments
+        if self.formality >= 8:
+            response = response.replace("I'm", "I am").replace("can't", "cannot")
+        elif self.formality <= 3:
+            response = response.replace("I would", "I'd").replace("cannot", "can't")
+        
+        return response
 
 class FileSystemRAG:
     """Real RAG system for indexing and understanding user's files"""
     
-    def __init__(self, watch_dir: Path, db_path: Path):
-        self.watch_dir = watch_dir
-        self.db_path = db_path
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+    def __init__(self, watch_dir: Path, db_path: Path = None):
+        self.watch_dir = Path(watch_dir)
+        # Default db_path to a subdirectory of watch_dir if not provided
+        self.db_path = Path(db_path) if db_path else self.watch_dir / ".rag_db"
+        self.db_path.mkdir(parents=True, exist_ok=True)
         
         # Initialize databases
         self._init_sqlite()
@@ -150,15 +338,18 @@ class FileSystemRAG:
     def _should_index_file(self, file_path: Path) -> bool:
         """Determine if file should be indexed"""
         # Skip system files, temp files, etc.
-        skip_patterns = ['.tmp', '.cache', '.git', '__pycache__', '.DS_Store']
-        skip_dirs = ['node_modules', '.venv', 'venv', '.git']
+        skip_patterns = ['.tmp', '.cache', '.git', '__pycache__', '.DS_Store', '.db']
+        skip_dirs = ['node_modules', '.venv', 'venv', '.git', '.rag_db']
         
         if any(pattern in str(file_path) for pattern in skip_patterns):
             return False
         if any(dir_name in file_path.parts for dir_name in skip_dirs):
             return False
-        if file_path.stat().st_size > 50 * 1024 * 1024:  # Skip files > 50MB
-            return False
+        try:
+            if file_path.stat().st_size > 50 * 1024 * 1024:  # Skip files > 50MB
+                return False
+        except OSError:
+            return False  # Skip if we can't stat the file
             
         return True
     
@@ -334,6 +525,63 @@ class FileSystemRAG:
         """, (time.time(), file_path))
         
         self.conn.commit()
+    
+    def index_files(self):
+        """Index all files in the watch directory"""
+        for file_path in self.watch_dir.rglob("*"):
+            if file_path.is_file() and self._should_index_file(file_path):
+                try:
+                    self.index_file(file_path)
+                except Exception as e:
+                    logging.error(f"Error indexing {file_path}: {e}")
+    
+    def search_files(self, query: str, limit: int = 10) -> List[Dict]:
+        """Search for files matching query (alias for search with file_path key)"""
+        results = self.search(query, limit)
+        # Ensure results have 'file_path' key for test compatibility
+        for r in results:
+            if 'file_path' not in r:
+                r['file_path'] = r.get('path', '')
+        return results
+    
+    def semantic_search(self, query: str, top_k: int = 10) -> List[Dict]:
+        """Semantic vector search for files"""
+        results = []
+        
+        if self.vector_enabled:
+            try:
+                query_embedding = self.encoder.encode([query])
+                vector_results = self.collection.query(
+                    query_embeddings=query_embedding.tolist(),
+                    n_results=top_k
+                )
+                
+                for i, doc_id in enumerate(vector_results['ids'][0]):
+                    results.append({
+                        'path': doc_id,
+                        'file_path': doc_id,
+                        'content': vector_results['documents'][0][i],
+                        'metadata': vector_results['metadatas'][0][i],
+                        'score': 1 - vector_results['distances'][0][i],
+                        'source': 'vector'
+                    })
+                    
+            except Exception as e:
+                logging.error(f"Semantic search failed: {e}")
+        
+        return results
+    
+    def _extract_text_content(self, file_path: Path, max_chars: int = 1000) -> str:
+        """Extract text content from a file (alias for _extract_content_preview)"""
+        return self._extract_content_preview(file_path, max_chars)
+    
+    def close(self):
+        """Close database connections and stop monitoring"""
+        if self.observer:
+            self.observer.stop()
+            self.observer.join()
+        if self.conn:
+            self.conn.close()
 
 class MicroLLMBrain:
     """Tiny LLM brain optimized for bit buddy tasks"""
@@ -495,10 +743,14 @@ class EnhancedBitBuddy:
                 logging.warning("Debug tools not available")
         
         # Initialize components
-        self.personality = self._load_or_create_personality()
+        self.personality, is_new_personality = self._load_or_create_personality()
         self.rag = FileSystemRAG(self.watch_dir, self.buddy_dir / "rag")
         self.brain = MicroLLMBrain(model_path)
         self.health_status = "healthy"
+        
+        # Log birth event for new personalities (after self.personality is set)
+        if is_new_personality:
+            self._log_event("birth", f"Hello! I'm {self.personality.name}, your new bit buddy!")
         
         # Start initial file scan
         try:
@@ -534,21 +786,24 @@ class EnhancedBitBuddy:
         # Run scan in background thread
         threading.Thread(target=scan_files, daemon=True).start()
     
-    def _load_or_create_personality(self) -> BitBuddyPersonality:
-        """Load existing personality or create new one"""
+    def _load_or_create_personality(self) -> Tuple[BitBuddyPersonality, bool]:
+        """Load existing personality or create new one
+        
+        Returns:
+            Tuple of (personality, is_new) where is_new is True if a new personality was generated
+        """
         if self.persona_file.exists():
             try:
                 with open(self.persona_file, 'r') as f:
                     data = json.load(f)
-                return BitBuddyPersonality(**data)
+                return BitBuddyPersonality(**data), False
             except Exception:
                 pass
         
         # Create new personality
         personality = self._generate_personality()
         self._save_personality(personality)
-        self._log_event("birth", f"Hello! I'm {personality.name}, your new bit buddy!")
-        return personality
+        return personality, True
     
     def _generate_personality(self) -> BitBuddyPersonality:
         """Generate unique personality"""
@@ -617,7 +872,8 @@ class EnhancedBitBuddy:
     def _save_personality(self, personality: BitBuddyPersonality):
         """Save personality to disk"""
         with open(self.persona_file, 'w') as f:
-            json.dump(asdict(personality), f, indent=2)
+            # Use _to_dict() to avoid issues with defaultdict and asdict()
+            json.dump(personality._to_dict(), f, indent=2)
     
     def _log_event(self, event_type: str, note: str):
         """Log event to buddy's journal"""
@@ -641,6 +897,23 @@ class EnhancedBitBuddy:
         try:
             # Search for relevant files
             file_results = self.rag.search(query, limit=5)
+            
+            # If no results found and query is asking about files, return all indexed files
+            if not file_results and ("file" in query.lower() or "see" in query.lower() or "find" in query.lower()):
+                cursor = self.rag.conn.execute("""
+                    SELECT path, name, content_preview, file_type 
+                    FROM files 
+                    ORDER BY modified DESC
+                    LIMIT 10
+                """)
+                for row in cursor.fetchall():
+                    file_results.append({
+                        'path': row[0],
+                        'name': row[1],
+                        'content': row[2],
+                        'file_type': row[3],
+                        'source': 'all_files'
+                    })
             
             # Generate intelligent response
             context = f"Found {len(file_results)} relevant files"
@@ -675,6 +948,14 @@ class EnhancedBitBuddy:
             "answer": response,
             "aside": aside,
             "files_found": len(file_results),
+            "files": [
+                {
+                    "name": Path(r['path']).name,
+                    "path": r.get('path', ''),
+                    "type": r.get('file_type', 'unknown'),
+                    "relevance": r.get('score', 0)
+                } for r in file_results
+            ],
             "file_results": [
                 {
                     "name": Path(r['path']).name,
