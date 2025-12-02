@@ -677,7 +677,11 @@ class EnhancedBitBuddy:
     def _save_personality(self, personality: BitBuddyPersonality):
         """Save personality to disk"""
         with open(self.persona_file, 'w') as f:
-            json.dump(asdict(personality), f, indent=2)
+            # Convert to dict and ensure defaultdict is converted to regular dict
+            personality_dict = asdict(personality)
+            if isinstance(personality_dict.get('file_expertise'), defaultdict):
+                personality_dict['file_expertise'] = dict(personality_dict['file_expertise'])
+            json.dump(personality_dict, f, indent=2)
 
     def _log_event(self, event_type: str, note: str):
         """Log event to buddy's journal"""
