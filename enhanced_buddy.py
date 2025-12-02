@@ -674,13 +674,21 @@ class EnhancedBitBuddy:
             }
         )
 
+    def _convert_defaultdicts(self, obj):
+        """Recursively convert all defaultdict instances to regular dicts"""
+        if isinstance(obj, defaultdict):
+            obj = dict(obj)
+        if isinstance(obj, dict):
+            return {k: self._convert_defaultdicts(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [self._convert_defaultdicts(item) for item in obj]
+        return obj
+
     def _save_personality(self, personality: BitBuddyPersonality):
         """Save personality to disk"""
         with open(self.persona_file, 'w') as f:
-            # Convert to dict and ensure defaultdict is converted to regular dict
-            personality_dict = asdict(personality)
-            if isinstance(personality_dict.get('file_expertise'), defaultdict):
-                personality_dict['file_expertise'] = dict(personality_dict['file_expertise'])
+            # Convert to dict and recursively convert any defaultdict to regular dict
+            personality_dict = self._convert_defaultdicts(asdict(personality))
             json.dump(personality_dict, f, indent=2)
 
     def _log_event(self, event_type: str, note: str):
