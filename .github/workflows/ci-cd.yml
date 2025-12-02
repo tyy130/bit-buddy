@@ -64,9 +64,9 @@ jobs:
           from pathlib import Path
           
           required_files = [
-              'enhanced_buddy.py', 'mesh_network.py', 'deploy.py',
-              'debug_tools.py', 'test_runner.py', 'setup.py',
-              'requirements.txt', 'README.md'
+              'enhanced_buddy.py', 'mesh_network.py', 'setup.py',
+              'requirements.txt', 'README.md',
+              'tools/deploy.py', 'tools/debug_tools.py', 'tools/test_runner.py'
           ]
           
           missing = []
@@ -117,7 +117,7 @@ jobs:
       - name: Run unit tests
         run: |
           echo "🧪 Running unit tests on ${{ matrix.os }} with Python ${{ matrix.python }}"
-          python test_runner.py --unit --verbose
+          python tools/test_runner.py --unit --verbose
       
       - name: Upload test results
         uses: actions/upload-artifact@v3
@@ -159,7 +159,7 @@ jobs:
         run: |
           echo "🔗 Running integration tests with isolated environment"
           export TEST_WORKSPACE=$PWD/test-workspace
-          python test_runner.py --integration --verbose
+          python tools/test_runner.py --integration --verbose
       
       - name: Upload integration results
         uses: actions/upload-artifact@v3
@@ -199,7 +199,7 @@ jobs:
         run: |
           echo "🚀 Running performance tests"
           export TEST_DATA_DIR=$PWD/perf-test-data
-          python test_runner.py --performance --verbose
+          python tools/test_runner.py --performance --verbose
       
       - name: Generate performance report
         run: |
@@ -254,7 +254,7 @@ jobs:
         run: |
           echo "🧠 Running AI model tests with mock model"
           export TEST_MODEL_PATH=$PWD/test-models/tiny-model.gguf
-          python test_runner.py --model-tests --verbose
+          python tools/test_runner.py --model-tests --verbose
       
       - name: Upload model test results
         uses: actions/upload-artifact@v3
@@ -327,7 +327,7 @@ jobs:
           COPY . .
           
           # Run tests by default
-          CMD ["python", "test_runner.py", "--unit", "--verbose"]
+          CMD ["python", "tools/test_runner.py", "--unit", "--verbose"]
           EOF
       
       - name: Build test image
@@ -459,8 +459,9 @@ jobs:
           mkdir -p dist
           
           # Copy essential files
-          cp enhanced_buddy.py mesh_network.py deploy.py debug_tools.py dist/
+          cp enhanced_buddy.py mesh_network.py dist/
           cp setup.py requirements.txt README.md dist/
+          cp -r tools dist/
           cp -r tests dist/
           
           # Create version file
