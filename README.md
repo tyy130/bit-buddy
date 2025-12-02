@@ -192,7 +192,7 @@ Nova: "I prefer chronological with location metadata tags"
 ├── MeshMessage         # Standardized communication
 └── Discovery & Trust   # Auto-discovery with trust levels
 
-📁 deploy.py            # Management & deployment
+📁 tools/deploy.py       # Management & deployment
 ├── BuddyDeploymentManager  # Install & configure buddies
 ├── Model Management     # Download & manage AI models
 └── Health Monitoring   # System health & optimization
@@ -212,54 +212,54 @@ Nova: "I prefer chronological with location metadata tags"
 
 ```bash
 # Create specialized buddies
-python deploy.py create-buddy "CodeWizard" ~/Projects --model qwen2.5-1.5b
-python deploy.py create-buddy "PhotoFriend" ~/Pictures --model tinyllama-1.1b  
-python deploy.py create-buddy "DocMaster" ~/Documents --model phi3.5-mini
+python tools/deploy.py create-buddy "CodeWizard" ~/Projects --model qwen2.5-1.5b
+python tools/deploy.py create-buddy "PhotoFriend" ~/Pictures --model tinyllama-1.1b  
+python tools/deploy.py create-buddy "DocMaster" ~/Documents --model phi3.5-mini
 
 # Start them all
-python deploy.py start-buddy CodeWizard --port 8001
-python deploy.py start-buddy PhotoFriend --port 8002
-python deploy.py start-buddy DocMaster --port 8003
+python tools/deploy.py start-buddy CodeWizard --port 8001
+python tools/deploy.py start-buddy PhotoFriend --port 8002
+python tools/deploy.py start-buddy DocMaster --port 8003
 ```
 
 ### Buddy Management
 
 ```bash
 # List all your buddies
-python deploy.py list-buddies
+python tools/deploy.py list-buddies
 
 # Check system health
-python deploy.py health
+python tools/deploy.py health
 
 # Download additional models
-python deploy.py download-model phi3.5-mini
+python tools/deploy.py download-model phi3.5-mini
 
 # Export/Import buddy configurations
-python deploy.py export-buddy Pixel pixel_backup.zip
-python deploy.py import-buddy pixel_backup.zip --name PixelJr
+python tools/deploy.py export-buddy Pixel pixel_backup.zip
+python tools/deploy.py import-buddy pixel_backup.zip --name PixelJr
 ```
 
 ### Testing & Debugging
 
 ```bash
 # Run comprehensive test suite
-python deploy.py test --type all --verbose
+python tools/deploy.py test --type all --verbose
 
 # Run specific test types
-python deploy.py test --type unit          # Fast unit tests
-python deploy.py test --type integration  # Full integration tests  
-python deploy.py test --type performance  # Performance benchmarks
+python tools/deploy.py test --type unit          # Fast unit tests
+python tools/deploy.py test --type integration  # Full integration tests  
+python tools/deploy.py test --type performance  # Performance benchmarks
 
 # Debug a specific buddy
-python deploy.py debug MyBuddy --operation "file_scan"
+python tools/deploy.py debug MyBuddy --operation "file_scan"
 
 # Create buddy with debug mode enabled
-python deploy.py create-buddy DebugBuddy ~/Documents --debug
+python tools/deploy.py create-buddy DebugBuddy ~/Documents --debug
 
 # Manual debugging tools
-python debug_tools.py check-files ~/Documents
-python debug_tools.py monitor --duration 60
-python test_runner.py --stress --stress-duration 30
+python tools/debug_tools.py check-files ~/Documents
+python tools/debug_tools.py monitor --duration 60
+python tools/test_runner.py --stress --stress-duration 30
 ```
 
 ### Development & Customization
@@ -276,7 +276,7 @@ export BUDDY_LOG_LEVEL=DEBUG
 python start_buddy.py
 
 # Performance monitoring
-python debug_tools.py monitor --duration 120
+python tools/debug_tools.py monitor --duration 120
 ```
 
 ## 🎭 Personality Examples
@@ -356,8 +356,8 @@ pip install -r requirements.txt
 python setup.py --development
 
 # Run tests
-python test_runner.py --all --verbose
-python debug_tools.py --check-system
+python tools/test_runner.py --all --verbose
+python tools/debug_tools.py --check-system
 ```
 
 ### 🐳 Container Testing
@@ -467,22 +467,22 @@ python3 setup.py
 **"Model download failed"**
 ```bash
 # Check internet connection and disk space
-python deploy.py health
+python tools/deploy.py health
 # Try alternate model
-python deploy.py download-model tinyllama-1.1b
+python tools/deploy.py download-model tinyllama-1.1b
 ```
 
 **"Buddy seems slow"**  
 ```bash
 # Check system resources and performance
-python deploy.py health
-python deploy.py debug MyBuddy
+python tools/deploy.py health
+python tools/deploy.py debug MyBuddy
 
 # Try lighter model
-python deploy.py create-buddy NewBuddy ~/Documents --model tinyllama-1.1b
+python tools/deploy.py create-buddy NewBuddy ~/Documents --model tinyllama-1.1b
 
 # Run performance tests
-python deploy.py test --type performance
+python tools/deploy.py test --type performance
 ```
 
 **"Mesh network not working"**
@@ -494,11 +494,11 @@ python deploy.py test --type performance
 
 ### Getting Help
 
-1. **Check Health**: `python deploy.py health`
-2. **Debug Issues**: `python deploy.py debug {buddy_name}`
-3. **Run Tests**: `python deploy.py test --type all`
+1. **Check Health**: `python tools/deploy.py health`
+2. **Debug Issues**: `python tools/deploy.py debug {buddy_name}`
+3. **Run Tests**: `python tools/deploy.py test --type all`
 4. **View Logs**: Look for buddy logs in `~/.bit_buddies/buddies/{name}/`
-5. **Performance Check**: `python debug_tools.py monitor --duration 60`
+5. **Performance Check**: `python tools/debug_tools.py monitor --duration 60`
 6. **Community**: Join discussions in Issues
 7. **Documentation**: See `.github/copilot-instructions.md` for developers
 
@@ -553,7 +553,7 @@ pip install pytest pytest-asyncio
 pytest
 
 # Create test buddy
-python deploy.py create-buddy TestBuddy ~/test_files --model tinyllama-1.1b
+python tools/deploy.py create-buddy TestBuddy ~/test_files --model tinyllama-1.1b
 ```
 
 ## 📜 License

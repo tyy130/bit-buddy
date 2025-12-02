@@ -98,16 +98,16 @@ echo "⚡ Setting up aliases..."
 cat >> ~/.bashrc << 'EOF'
 
 # Bit Buddy Development Aliases
-alias bb-test="python test_runner.py"
-alias bb-debug="python debug_tools.py"
-alias bb-deploy="python deploy.py"
+alias bb-test="python tools/test_runner.py"
+alias bb-debug="python tools/debug_tools.py"
+alias bb-deploy="python tools/deploy.py"
 alias bb-setup="python setup.py"
-alias bb-health="python deploy.py health"
+alias bb-health="python tools/deploy.py health"
 
 # Quick test commands
-alias test-unit="python test_runner.py --unit --verbose"
-alias test-integration="python test_runner.py --integration --verbose" 
-alias test-all="python test_runner.py --all --verbose"
+alias test-unit="python tools/test_runner.py --unit --verbose"
+alias test-integration="python tools/test_runner.py --integration --verbose" 
+alias test-all="python tools/test_runner.py --all --verbose"
 
 # Development helpers
 alias serve-docs="python -m http.server 8080"

@@ -403,9 +403,9 @@ def show_next_steps(buddy_name):
    To manually activate: {venv_activate}
 
 🛠️  ADVANCED MANAGEMENT (activate venv first, or use start.sh):
-   python deploy.py list-buddies           # See all your buddies
-   python deploy.py start-buddy {buddy_name}      # Start in background
-   python deploy.py health                 # System health check
+   python tools/deploy.py list-buddies           # See all your buddies
+   python tools/deploy.py start-buddy {buddy_name}      # Start in background
+   python tools/deploy.py health                 # System health check
 
 💡 WHAT YOUR BUDDY CAN DO:
    ✅ Instantly find files by content
@@ -460,7 +460,7 @@ def main():
         ).lower()
         if response not in ["y", "yes"]:
             print(
-                "\n💡 Use './start.sh' or 'python deploy.py list-buddies' to see existing buddies"
+                "\n💡 Use './start.sh' or 'python tools/deploy.py list-buddies' to see existing buddies"
             )
             return 0
 
