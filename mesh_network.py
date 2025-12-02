@@ -35,13 +35,13 @@ class BuddyPeer:
 
 class BuddyMeshNetwork:
     """Manages mesh networking between bit buddies
-    
+
     Provides secure P2P communication, auto-discovery, and trust management.
     """
 
     def __init__(self, buddy, port: int = 0):
         """Initialize mesh network
-        
+
         Args:
             buddy: The EnhancedBitBuddy instance
             port: Port to listen on (0 for auto-select)
@@ -65,14 +65,14 @@ class BuddyMeshNetwork:
 
     async def send_message(self, peer_id: str, message: MeshMessage) -> bool:
         """Send a message to a peer
-        
+
         Args:
             peer_id: ID of the peer to send to
             message: Message to send
-            
+
         Returns:
             True if message was sent successfully
-            
+
         Note: This is a stub implementation for testing.
         """
         if peer_id not in self.peers:
@@ -82,13 +82,13 @@ class BuddyMeshNetwork:
 
     async def broadcast(self, message: MeshMessage) -> int:
         """Broadcast a message to all peers
-        
+
         Args:
             message: Message to broadcast
-            
+
         Returns:
             Number of peers message was sent to
-            
+
         Note: This is a stub implementation for testing.
         """
         # Stub: In a real implementation, this would send to all peers
