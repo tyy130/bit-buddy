@@ -48,7 +48,12 @@ index/meta.jsonl
 
 # User data directories
 kb/
-custodian/
+
+# Runtime-generated custodian files (not version-controlled)
+custodian/secret.key
+custodian/journal.jsonl
+custodian/persona.yaml
+custodian/peers.json
 
 # Build artifacts
 *.exe

@@ -89,9 +89,7 @@ class CharacterSelector:
         return char_id, CHARACTERS[char_id]
 
     @staticmethod
-    def apply_character_to_persona(
-        character_id: str, persona_data: Dict
-    ) -> Dict:
+    def apply_character_to_persona(character_id: str, persona_data: Dict) -> Dict:
         """Apply character traits to persona configuration"""
         char = CHARACTERS.get(character_id, CHARACTERS["glitch"])
 
@@ -158,9 +156,11 @@ if __name__ == "__main__":
         print(f"{'='*60}")
         print(f"🤖 {char['name']} ({char_id})")
         print(f"   {char['description']}")
-        print(f"   Traits: Curiosity={char['default_traits']['curiosity']}, "
-              f"Humor={char['default_traits']['humor']}, "
-              f"Formality={char['default_traits']['formality']}")
+        print(
+            f"   Traits: Curiosity={char['default_traits']['curiosity']}, "
+            f"Humor={char['default_traits']['humor']}, "
+            f"Formality={char['default_traits']['formality']}"
+        )
         print(f"   Catchphrase: \"{char['catchphrase']}\"")
         print(f"   Colors: {', '.join(char['colors'])}")
         print()

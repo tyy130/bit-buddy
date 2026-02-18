@@ -4,8 +4,9 @@ Simple icon generator for Bit Buddy
 Creates a basic placeholder icon with personality
 """
 
-from PIL import Image, ImageDraw
 import os
+
+from PIL import Image, ImageDraw
 
 
 def create_buddy_icon(output_path, size=256, personality="curious"):
@@ -33,9 +34,7 @@ def create_buddy_icon(output_path, size=256, personality="curious"):
             scheme["bg"][2],
             255 - i * 30,
         )
-        draw.ellipse(
-            [offset, offset, size - offset, size - offset], fill=color
-        )
+        draw.ellipse([offset, offset, size - offset, size - offset], fill=color)
 
     # Inner accent circle
     inner_margin = margin * 2
@@ -202,10 +201,7 @@ def main():
         img.save(f"{iconset_dir}/icon_{name}.png", "PNG")
 
     print(f"✅ Created iconset directory: {iconset_dir}")
-    print(
-        "   Run 'iconutil -c icns assets/buddy_icon.iconset' "
-        "on macOS to create .icns"
-    )
+    print("   Run 'iconutil -c icns assets/buddy_icon.iconset' " "on macOS to create .icns")
 
     # Summary
     print("\n📋 Icon Summary:")
@@ -216,10 +212,7 @@ def main():
     print("\n🎯 Next Steps:")
     print("   1. Review the generated icon")
     print("   2. Customize colors/style in this script if desired")
-    print(
-        "   3. Convert iconset to .icns on macOS: "
-        "iconutil -c icns assets/buddy_icon.iconset"
-    )
+    print("   3. Convert iconset to .icns on macOS: " "iconutil -c icns assets/buddy_icon.iconset")
     print("   4. Build executable: pyinstaller buddy.spec")
 
 

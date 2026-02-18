@@ -36,9 +36,7 @@ def _ensure_rag() -> bool:
         return True
     except Exception as e:
         rag_init_error = str(e)
-        logging.getLogger("app.server").warning(
-            "RAG initialization failed: %s", e
-        )
+        logging.getLogger("app.server").warning("RAG initialization failed: %s", e)
         return False
 
 
@@ -75,10 +73,7 @@ def chat(inp: ChatIn):
     if cfg["llm"]["provider"] == "llamacpp":
         base_url = cfg["llm"]["llamacpp"]["base_url"].rstrip("/")
         url = f"{base_url}/v1/chat/completions"
-        system_msg = (
-            "You are a concise assistant that only uses "
-            "the provided context."
-        )
+        system_msg = "You are a concise assistant that only uses " "the provided context."
         payload = {
             "model": cfg["llm"]["llamacpp"]["model"],
             "messages": [
@@ -95,10 +90,7 @@ def chat(inp: ChatIn):
     else:
         # Ollama
         url = cfg["llm"]["ollama"]["base_url"].rstrip("/") + "/api/chat"
-        system_msg = (
-            "You are a concise assistant that only uses "
-            "the provided context."
-        )
+        system_msg = "You are a concise assistant that only uses " "the provided context."
         payload = {
             "model": cfg["llm"]["ollama"]["model"],
             "messages": [

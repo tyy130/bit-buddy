@@ -223,9 +223,7 @@ class BuddyMeshNetwork:
 
         # Create signature
         sign_data = f"{message_id}{self.buddy_id}{recipient_id}{timestamp}"
-        signature = hashlib.sha256(
-            (sign_data + self._secret_key).encode()
-        ).hexdigest()
+        signature = hashlib.sha256((sign_data + self._secret_key).encode()).hexdigest()
 
         return MeshMessage(
             message_id=message_id,

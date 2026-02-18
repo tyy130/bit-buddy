@@ -45,15 +45,22 @@ classifiers = [
 dependencies = [
     "fastapi>=0.104.0",
     "uvicorn>=0.24.0",
+    "python-multipart>=0.0.6",
     "sentence-transformers>=2.2.2",
     "chromadb>=0.4.18",
+    "fastembed>=0.3.4",
     "watchdog>=3.0.0",
+    "pypdf>=4.3.1",
+    "docx2txt>=0.8",
+    "chardet>=5.2.0",
+    "markdown-it-py>=3.0.0",
     "requests>=2.31.0",
     "cryptography>=41.0.0",
     "psutil>=5.9.0",
     "pydantic>=2.4.0",
     "click>=8.1.0",
-    "rich>=13.7.0"
+    "rich>=13.7.0",
+    "numpy>=2.1.2"
 ]
 
 [project.optional-dependencies]
@@ -71,8 +78,14 @@ models = [
     "torch>=2.0.0",
     "transformers>=4.35.0"
 ]
+gui = [
+    "pandas>=2.1.0",
+    "Pillow>=10.1.0",
+    "openpyxl>=3.1.0",
+    "websockets>=12.0"
+]
 full = [
-    "bit-buddy[dev,models]"
+    "bit-buddy[dev,models,gui]"
 ]
 
 [project.scripts]

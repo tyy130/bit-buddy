@@ -285,12 +285,8 @@ class PreBuildTester:
             print("🎉 ALL TESTS PASSED - READY TO BUILD!")
             print("\n📦 Next steps:")
             print("   1. Build executable: pyinstaller buddy.spec")
-            print(
-                "   2. Test executable: dist/BitBuddy or dist/BitBuddy.exe"
-            )  # noqa: E501
-            print(
-                "   3. Create installer (Windows): iscc BitBuddyInstaller.iss"
-            )  # noqa: E501
+            print("   2. Test executable: dist/BitBuddy or dist/BitBuddy.exe")  # noqa: E501
+            print("   3. Create installer (Windows): iscc BitBuddyInstaller.iss")  # noqa: E501
             return True
         else:
             print("⚠️  SOME TESTS FAILED - FIX ISSUES BEFORE BUILDING")

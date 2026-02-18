@@ -90,9 +90,7 @@ class BuddyDeploymentManager:
         """
         return self.MODEL_REGISTRY.copy()
 
-    def create_buddy(
-        self, name: str, watch_dir: Path, model_id: str
-    ) -> Dict[str, Any]:
+    def create_buddy(self, name: str, watch_dir: Path, model_id: str) -> Dict[str, Any]:
         """Create a new buddy instance
 
         Args:
@@ -218,9 +216,7 @@ class BuddyDeploymentManager:
             "issues": issues,
             "recommendations": recommendations,
             "disk_free_gb": drive_info.get("free_gb") if "drive_info" in dir() else None,
-            "ram_available_gb": (
-                ram_info.get("available_gb") if "ram_info" in dir() else None
-            ),
+            "ram_available_gb": (ram_info.get("available_gb") if "ram_info" in dir() else None),
         }
 
     def get_buddy(self, name: str) -> Dict[str, Any]:

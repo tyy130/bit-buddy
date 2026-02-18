@@ -29,7 +29,7 @@ def fix_long_strings(filepath: Path):
             indent_str = " " * indent
 
             # Check if it's an f-string
-            if "f\"" in line or "f'" in line:
+            if 'f"' in line or "f'" in line:
                 # Try to split f-string
                 match = re.search(r'(.*?f["\'])(.+)(["\'].*)', line)
                 if match and len(match.group(2)) > 40:
@@ -49,10 +49,10 @@ def fix_long_strings(filepath: Path):
                         part2 = content[break_point + 1 :]
 
                         new_lines.append(
-                            f'{indent_str}(\n'
+                            f"{indent_str}(\n"
                             f'{indent_str}    {prefix}{part1}"\n'
                             f'{indent_str}    f"{part2}{suffix}\n'
-                            f'{indent_str})\n'
+                            f"{indent_str})\n"
                         )
                         modified = True
                         continue

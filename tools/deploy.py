@@ -103,9 +103,7 @@ class BuddyDeploymentManager:
 
         return installed
 
-    async def download_model(
-        self, model_id: str, progress_callback=None
-    ) -> Path:
+    async def download_model(self, model_id: str, progress_callback=None) -> Path:
         """Download and install a model"""
         if model_id not in self.model_registry:
             raise ValueError(f"Unknown model: {model_id}")
@@ -209,9 +207,7 @@ class BuddyDeploymentManager:
         }
 
         # Name-influenced traits
-        if any(
-            word in name_lower for word in ["tech", "code", "dev", "pixel"]
-        ):
+        if any(word in name_lower for word in ["tech", "code", "dev", "pixel"]):
             traits["specialties"] = ["programming", "technical_docs"]
             traits["curiosity"] += 2
         elif any(word in name_lower for word in ["art", "creative", "design"]):
@@ -235,11 +231,7 @@ class BuddyDeploymentManager:
 
         for name, config in self.config["buddies"].items():
             buddy_dir = Path(config["buddy_dir"])
-            status = (
-                "active"
-                if (buddy_dir / "personality.json").exists()
-                else "inactive"
-            )
+            status = "active" if (buddy_dir / "personality.json").exists() else "inactive"
 
             buddies.append(
                 {
@@ -313,9 +305,7 @@ if __name__ == "__main__":
     def stop_buddy(self, name: str):
         """Stop a running buddy"""
         # TODO: Implement proper process management
-        print(
-            f"⏹️  Stopping buddy '{name}' (use Ctrl+C in the buddy's terminal)"
-        )
+        print(f"⏹️  Stopping buddy '{name}' (use Ctrl+C in the buddy's terminal)")
 
     def setup_auto_start(self):
         """Setup buddies to auto-start on system boot"""
@@ -349,12 +339,8 @@ if __name__ == "__main__":
                 missing_packages.append(package)
 
         if missing_packages:
-            health["issues"].append(
-                f"Missing packages: {', '.join(missing_packages)}"
-            )
-            health["recommendations"].append(
-                "Run: pip install -r requirements.txt"
-            )
+            health["issues"].append(f"Missing packages: {', '.join(missing_packages)}")
+            health["recommendations"].append("Run: pip install -r requirements.txt")
 
         # Check available RAM
         try:
@@ -362,33 +348,21 @@ if __name__ == "__main__":
 
             available_ram_gb = psutil.virtual_memory().available / (1024**3)
             if available_ram_gb < 2:
-                health["issues"].append(
-                    f"Low RAM: {available_ram_gb:.1f}GB available"
-                )
+                health["issues"].append(f"Low RAM: {available_ram_gb:.1f}GB available")
                 health["recommendations"].append(
                     "Consider using TinyLlama model for low-RAM systems"
                 )
         except ImportError:
-            health["recommendations"].append(
-                "Install psutil for system monitoring"
-            )
+            health["recommendations"].append("Install psutil for system monitoring")
 
         # Check disk space
-        available_space_gb = shutil.disk_usage(self.install_dir).free / (
-            1024**3
-        )
+        available_space_gb = shutil.disk_usage(self.install_dir).free / (1024**3)
         if available_space_gb < 5:
-            health["issues"].append(
-                f"Low disk space: {available_space_gb:.1f}GB available"
-            )
-            health["recommendations"].append(
-                "Free up disk space or change install directory"
-            )
+            health["issues"].append(f"Low disk space: {available_space_gb:.1f}GB available")
+            health["recommendations"].append("Free up disk space or change install directory")
 
         if health["issues"]:
-            health["system"] = (
-                "warning" if len(health["issues"]) == 1 else "unhealthy"
-            )
+            health["system"] = "warning" if len(health["issues"]) == 1 else "unhealthy"
 
         return health
 
@@ -422,9 +396,7 @@ if __name__ == "__main__":
         with zipfile.ZipFile(export_path, "w") as zf:
             # Add buddy config (without absolute paths)
             export_config = buddy_config.copy()
-            export_config["model_path"] = Path(
-                export_config["model_path"]
-            ).name
+            export_config["model_path"] = Path(export_config["model_path"]).name
             export_config["buddy_dir"] = "."
 
             zf.writestr("config.json", json.dumps(export_config, indent=2))
@@ -437,9 +409,7 @@ if __name__ == "__main__":
 
         print(f"📦 Exported buddy '{name}' to {export_path}")
 
-    def import_buddy(
-        self, import_path: Path, new_name: str = None, watch_dir: Path = None
-    ):
+    def import_buddy(self, import_path: Path, new_name: str = None, watch_dir: Path = None):
         """Import a buddy from export package"""
         with zipfile.ZipFile(import_path, "r") as zf:
             # Read config
@@ -471,9 +441,7 @@ def main():
     """CLI interface for deployment manager"""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Bit Buddy Deployment Manager"
-    )
+    parser = argparse.ArgumentParser(description="Bit Buddy Deployment Manager")
     subparsers = parser.add_subparsers(dest="command", help="Commands")
 
     # Health check
@@ -484,24 +452,16 @@ def main():
     subparsers.add_parser("installed-models", help="List installed models")
 
     # Download model
-    download_parser = subparsers.add_parser(
-        "download-model", help="Download a model"
-    )
+    download_parser = subparsers.add_parser("download-model", help="Download a model")
     download_parser.add_argument("model_id", help="Model ID to download")
 
     # Create buddy
-    create_parser = subparsers.add_parser(
-        "create-buddy", help="Create new buddy"
-    )
+    create_parser = subparsers.add_parser("create-buddy", help="Create new buddy")
     create_parser.add_argument("name", help="Buddy name")
     create_parser.add_argument("watch_dir", help="Directory to watch")
     create_parser.add_argument("--model", help="Model ID to use")
-    create_parser.add_argument(
-        "--no-mesh", action="store_true", help="Disable mesh networking"
-    )
-    create_parser.add_argument(
-        "--debug", action="store_true", help="Enable debug mode"
-    )
+    create_parser.add_argument("--no-mesh", action="store_true", help="Disable mesh networking")
+    create_parser.add_argument("--debug", action="store_true", help="Enable debug mode")
 
     # List buddies
     subparsers.add_parser("list-buddies", help="List all buddies")
@@ -522,24 +482,18 @@ def main():
         default="unit",
         help="Type of tests to run",
     )
-    test_parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Verbose output"
-    )
+    test_parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
 
     debug_parser = subparsers.add_parser("debug", help="Debug a buddy")
     debug_parser.add_argument("name", help="Buddy name to debug")
     debug_parser.add_argument("--operation", help="Specific operation to test")
 
     # Export/Import
-    export_parser = subparsers.add_parser(
-        "export-buddy", help="Export buddy configuration"
-    )
+    export_parser = subparsers.add_parser("export-buddy", help="Export buddy configuration")
     export_parser.add_argument("name", help="Buddy name")
     export_parser.add_argument("export_path", help="Export file path")
 
-    import_parser = subparsers.add_parser(
-        "import-buddy", help="Import buddy configuration"
-    )
+    import_parser = subparsers.add_parser("import-buddy", help="Import buddy configuration")
     import_parser.add_argument("import_path", help="Import file path")
     import_parser.add_argument("--name", help="New buddy name")
     import_parser.add_argument("--watch-dir", help="Directory to watch")
@@ -575,9 +529,7 @@ def main():
                 status = "✅" if info.get("recommended") else "⚪"
                 print(f"  {status} {model_id}")
                 print(f"      {info['description']}")
-                print(
-                    f"      Size: {info['size_mb']}MB, RAM: {info['ram_requirement']}"
-                )
+                print(f"      Size: {info['size_mb']}MB, RAM: {info['ram_requirement']}")
                 print()
 
         elif args.command == "installed-models":
@@ -607,12 +559,8 @@ def main():
             if buddies:
                 print("🤖 Your Bit Buddies:")
                 for buddy in buddies:
-                    status_emoji = (
-                        "🟢" if buddy["status"] == "active" else "⚪"
-                    )
-                    print(
-                        f"  {status_emoji} {buddy['name']} ({buddy['model']})"
-                    )
+                    status_emoji = "🟢" if buddy["status"] == "active" else "⚪"
+                    print(f"  {status_emoji} {buddy['name']} ({buddy['model']})")
                     print(f"      Watching: {buddy['watch_dir']}")
             else:
                 print("🤖 No buddies created yet")
@@ -675,9 +623,7 @@ def main():
                     buddy_dir=Path(buddy_config["buddy_dir"]),
                     watch_dir=Path(buddy_config["watch_dir"]),
                     model_path=(
-                        Path(buddy_config["model_path"])
-                        if buddy_config["model_path"]
-                        else None
+                        Path(buddy_config["model_path"]) if buddy_config["model_path"] else None
                     ),
                     debug_mode=True,
                 )

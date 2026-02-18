@@ -37,9 +37,7 @@ def extract_text(path):
     if p.endswith(".pdf"):
         try:
             reader = PdfReader(path)
-            return "\n\n".join(
-                [page.extract_text() or "" for page in reader.pages]
-            )
+            return "\n\n".join([page.extract_text() or "" for page in reader.pages])
         except Exception:
             return ""
     if p.endswith(".docx"):
@@ -96,9 +94,7 @@ class RAG:
                 with open(self.meta_path, "r", encoding="utf-8") as f:
                     self._meta = [json.loads(line) for line in f]
                 # normalize
-                norms = (
-                    np.linalg.norm(self._emb, axis=1, keepdims=True) + 1e-12
-                )
+                norms = np.linalg.norm(self._emb, axis=1, keepdims=True) + 1e-12
                 self._emb = self._emb / norms
             except Exception:
                 self._emb = None
@@ -107,9 +103,7 @@ class RAG:
     def build_index(self):
         files = []
         for ext in ("*.pdf", "*.docx", "*.txt", "*.md"):
-            files.extend(
-                glob.glob(os.path.join(self.kb_dir, "**", ext), recursive=True)
-            )
+            files.extend(glob.glob(os.path.join(self.kb_dir, "**", ext), recursive=True))
 
         meta = []
         chunks = []
@@ -171,9 +165,7 @@ class RAG:
             fp = os.path.join(self.kb_dir, m["path"])
             txt = extract_text(fp)
             parts = chunk_text(txt, self.chunk_chars, self.chunk_overlap)
-            chunk_text_str = (
-                parts[m["chunk_id"]] if m["chunk_id"] < len(parts) else ""
-            )
+            chunk_text_str = parts[m["chunk_id"]] if m["chunk_id"] < len(parts) else ""
             results.append(
                 {
                     "path": m["path"],
@@ -189,9 +181,6 @@ class RAG:
             "isn't present, say you don't have enough info.\n\n"
         )
         ctx = "\n\n---\n\n".join(
-            [
-                f"Source: {c['path']}#chunk{c['chunk_id']}\n{c['text']}"
-                for c in contexts
-            ]
+            [f"Source: {c['path']}#chunk{c['chunk_id']}\n{c['text']}" for c in contexts]
         )
         return header + ctx + f"\n\nQuestion: {query}\nAnswer:"

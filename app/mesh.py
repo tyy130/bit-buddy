@@ -14,12 +14,8 @@ from pydantic import BaseModel
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CUSTODIAN_DIR = ROOT / "custodian"
-MANIFEST = yaml.safe_load(
-    open(CUSTODIAN_DIR / "manifest.yaml", "r", encoding="utf-8")
-)
-POLICY = yaml.safe_load(
-    open(CUSTODIAN_DIR / "policy.yaml", "r", encoding="utf-8")
-)
+MANIFEST = yaml.safe_load(open(CUSTODIAN_DIR / "manifest.yaml", "r", encoding="utf-8"))
+POLICY = yaml.safe_load(open(CUSTODIAN_DIR / "policy.yaml", "r", encoding="utf-8"))
 PEERS = json.load(open(CUSTODIAN_DIR / "peers.json", "r", encoding="utf-8"))
 
 KEY_PATH = CUSTODIAN_DIR / "secret.key"
@@ -80,9 +76,7 @@ def hello():
         "owner": MANIFEST.get("owner"),
         "version": MANIFEST.get("version"),
         "llm_stick_version": MANIFEST.get("llm_stick_version"),
-        "kb_ready": os.path.exists(
-            ROOT / MANIFEST["storage"]["index_dir"] / "embeddings.npy"
-        ),
+        "kb_ready": os.path.exists(ROOT / MANIFEST["storage"]["index_dir"] / "embeddings.npy"),
     }
 
 
@@ -111,24 +105,18 @@ async def ask(request: Request, body: AskIn):
 
     # guard empty index
     index_dir = ROOT / MANIFEST["storage"]["index_dir"]
-    if POLICY.get("guardrails", {}).get(
-        "refuse_external_if_index_empty", True
-    ):
+    if POLICY.get("guardrails", {}).get("refuse_external_if_index_empty", True):
         if not (index_dir / "embeddings.npy").exists():
             raise HTTPException(status_code=409, detail="Index not ready")
 
     # call local RAG API
     rag_url = "http://127.0.0.1:11434/chat"
     try:
-        r = requests.post(
-            rag_url, json={"query": body.query, "k": body.k or 5}, timeout=120
-        )
+        r = requests.post(rag_url, json={"query": body.query, "k": body.k or 5}, timeout=120)
         r.raise_for_status()
         data = r.json()
     except Exception as e:
-        raise HTTPException(
-            status_code=502, detail=f"Local RAG not available: {e}"
-        )
+        raise HTTPException(status_code=502, detail=f"Local RAG not available: {e}")
 
     # apply share policy
     share = POLICY.get("share", {})

@@ -1,5 +1,5 @@
 # custodian/manifest.yaml
-id: "custodian-${RANDOM}"           # replace with a stable ID you choose
+id: "custodian-bitbuddy-main"       # stable descriptive ID
 name: "Unassigned Custodian"
 owner: "Blueprint Dynamics"
 created_utc: "2025-10-30T02:20:17Z"

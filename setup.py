@@ -11,7 +11,6 @@ import sys
 import venv
 from pathlib import Path
 
-
 # Directory where this script lives
 SCRIPT_DIR = Path(__file__).parent.resolve()
 VENV_DIR = SCRIPT_DIR / "venv"
@@ -19,8 +18,7 @@ VENV_DIR = SCRIPT_DIR / "venv"
 
 def print_banner():
     """Print welcome banner"""
-    print(
-        """
+    print("""
     🤖 =============================================== 🤖
     |                                               |
     |           🎯 BIT BUDDY QUICK SETUP 🎯          |
@@ -28,8 +26,7 @@ def print_banner():
     |     Your Personal File System Companion      |
     |                                               |
     🤖 =============================================== 🤖
-    """
-    )
+    """)
 
 
 def check_python_version():
@@ -40,14 +37,10 @@ def check_python_version():
             "❌ Python 3.8+ required. Current version:",
             f"{version.major}.{version.minor}.{version.micro}",
         )
-        print(
-            "   Please install Python 3.8 or newer: https://python.org/downloads/"
-        )
+        print("   Please install Python 3.8 or newer: https://python.org/downloads/")
         return False
 
-    print(
-        f"✅ Python {version.major}.{version.minor}.{version.micro} - Compatible!"
-    )
+    print(f"✅ Python {version.major}.{version.minor}.{version.micro} - Compatible!")
     return True
 
 
@@ -77,7 +70,7 @@ def create_virtual_environment():
                 [str(venv_python), "-m", "pip", "--version"],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
             )
             if result.returncode == 0:
                 print(f"✅ Virtual environment already exists at: {VENV_DIR}")
@@ -103,10 +96,7 @@ def create_virtual_environment():
 
         # Verify pip is functional
         result = subprocess.run(
-            [str(venv_python), "-m", "pip", "--version"],
-            capture_output=True,
-            text=True,
-            timeout=10
+            [str(venv_python), "-m", "pip", "--version"], capture_output=True, text=True, timeout=10
         )
         if result.returncode != 0:
             print(f"❌ pip verification failed: {result.stderr}")
@@ -182,15 +172,16 @@ def create_example_directories():
 
             # Add some sample files
             if name == "Documents":
-                (path / "welcome.txt").write_text("Welcome to Bit Buddy!\n\n"
-                                                  "Your digital companion is now watching this folder.\n"
-                                                  "Try asking: 'What files do you see?' or 'Tell me about yourself!'\n\n"
-                                                  "Bit buddies learn your file organization patterns and develop\n"
-                                                  "unique personalities based on what they discover.\n\n"
-                                                  "Have fun exploring with your new digital friend! 🤖✨")
+                (path / "welcome.txt").write_text(
+                    "Welcome to Bit Buddy!\n\n"
+                    "Your digital companion is now watching this folder.\n"
+                    "Try asking: 'What files do you see?' or 'Tell me about yourself!'\n\n"
+                    "Bit buddies learn your file organization patterns and develop\n"
+                    "unique personalities based on what they discover.\n\n"
+                    "Have fun exploring with your new digital friend! 🤖✨"
+                )
 
-                (path / "README.md").write_text(
-                    """
+                (path / "README.md").write_text("""
 # My Bit Buddy Demo
 
 This folder is being watched by your bit buddy!
@@ -210,8 +201,7 @@ This folder is being watched by your bit buddy!
 
 Your buddy learns from your files while respecting your privacy -
 everything stays local on your machine! 🔒
-                """
-                )
+                """)
 
     if created_dirs:
         print("\n📁 Created demo directories:")
@@ -245,9 +235,7 @@ def setup_first_buddy(demo_dirs):
                     flush=True,
                 )
 
-        _model_path = asyncio.run(
-            manager.download_model("qwen2.5-1.5b", progress_callback)
-        )
+        _model_path = asyncio.run(manager.download_model("qwen2.5-1.5b", progress_callback))
         print("\n✅ Model downloaded!")
 
         # Create buddy
@@ -264,9 +252,7 @@ def setup_first_buddy(demo_dirs):
 
         while True:
             try:
-                choice = input(
-                    f"Enter choice (1-{len(demo_dirs)}) or custom path: "
-                ).strip()
+                choice = input(f"Enter choice (1-{len(demo_dirs)}) or custom path: ").strip()
 
                 if choice.isdigit() and 1 <= int(choice) <= len(demo_dirs):
                     watch_dir = list(demo_dirs.values())[int(choice) - 1]
@@ -387,10 +373,11 @@ if __name__ == "__main__":
 
 def show_next_steps(buddy_name):
     """Show what to do next"""
-    venv_activate = "source venv/bin/activate" if sys.platform != "win32" else "venv\\Scripts\\activate"
+    venv_activate = (
+        "source venv/bin/activate" if sys.platform != "win32" else "venv\\Scripts\\activate"
+    )
     start_cmd = "./start.sh" if sys.platform != "win32" else "start.bat"
-    print(
-        f"""
+    print(f"""
 🎉 =============================================== 🎉
            🤖 {buddy_name.upper()} IS READY! 🤖
 🎉 =============================================== 🎉
@@ -429,8 +416,7 @@ def show_next_steps(buddy_name):
 
 🎯 HAVE FUN exploring with your new digital companion!
    Your files have never had such an enthusiastic friend! 🤖✨
-    """
-    )
+    """)
 
 
 def main():
@@ -455,9 +441,7 @@ def main():
         print("\n🔍 Existing bit buddy installation found!")
         print(f"   Location: {buddy_dir}")
 
-        response = input(
-            "\nWould you like to create another buddy? (y/N): "
-        ).lower()
+        response = input("\nWould you like to create another buddy? (y/N): ").lower()
         if response not in ["y", "yes"]:
             print(
                 "\n💡 Use './start.sh' or 'python deploy.py list-buddies' to see existing buddies"

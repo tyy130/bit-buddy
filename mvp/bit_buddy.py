@@ -8,7 +8,7 @@ import random
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 @dataclass
@@ -212,7 +212,6 @@ class BitBuddy:
         """Simulate RAG system querying your actual drive"""
         # In real implementation: index your files, search embeddings, build context
         # For MVP: simulate knowing about common file patterns
-
 
         query_lower = query.lower()
 

@@ -69,15 +69,9 @@ class BuddyGUI:
         self.chat_display.pack(fill="both", expand=True)
 
         # Configure tags for chat formatting
-        self.chat_display.tag_config(
-            "user", foreground="#3498DB", font=("Arial", 11, "bold")
-        )
-        self.chat_display.tag_config(
-            "buddy", foreground="#E74C3C", font=("Arial", 11, "bold")
-        )
-        self.chat_display.tag_config(
-            "aside", foreground="#95A5A6", font=("Arial", 9, "italic")
-        )
+        self.chat_display.tag_config("user", foreground="#3498DB", font=("Arial", 11, "bold"))
+        self.chat_display.tag_config("buddy", foreground="#E74C3C", font=("Arial", 11, "bold"))
+        self.chat_display.tag_config("aside", foreground="#95A5A6", font=("Arial", 9, "italic"))
 
         # Input area
         input_frame = tk.Frame(self.root)
@@ -135,14 +129,10 @@ class BuddyGUI:
         try:
             if self.buddy_dir.exists():
                 # Load existing
-                self.buddy = EnhancedBitBuddy(
-                    self.buddy_dir, self.watch_dir, model_path=None
-                )
+                self.buddy = EnhancedBitBuddy(self.buddy_dir, self.watch_dir, model_path=None)
                 personality = self.buddy.personality
                 self.buddy_name_label.config(text=f"🤖 {personality.name}")
-                self.status_label.config(
-                    text=f"Ready • Watching: {self.watch_dir.name}"
-                )
+                self.status_label.config(text=f"Ready • Watching: {self.watch_dir.name}")
                 self.add_chat_message(
                     "system",
                     f"Welcome back! {personality.name} is ready to help.",
@@ -153,10 +143,7 @@ class BuddyGUI:
         except Exception as e:
             messagebox.showerror(
                 "Error",
-                (
-                    f"Failed to initialize buddy: {str(e)}\n\n"
-                    "Please check your installation."
-                ),
+                (f"Failed to initialize buddy: {str(e)}\n\n" "Please check your installation."),
             )
 
     def setup_new_buddy(self):
@@ -186,9 +173,7 @@ class BuddyGUI:
         ).pack(pady=(20, 5))
 
         name_var = tk.StringVar(value="Pixel")
-        name_entry = tk.Entry(
-            setup_window, textvariable=name_var, font=("Arial", 12), width=30
-        )
+        name_entry = tk.Entry(setup_window, textvariable=name_var, font=("Arial", 12), width=30)
         name_entry.pack()
 
         # Folder selection
@@ -213,9 +198,7 @@ class BuddyGUI:
         tk.Button(
             folder_frame,
             text="Browse...",
-            command=lambda: folder_var.set(
-                filedialog.askdirectory(initialdir=str(self.watch_dir))
-            ),
+            command=lambda: folder_var.set(filedialog.askdirectory(initialdir=str(self.watch_dir))),
         ).pack(side="left")
 
         def finish_setup():
@@ -229,16 +212,12 @@ class BuddyGUI:
             # Create buddy
             try:
                 self.watch_dir = watch
-                self.buddy = EnhancedBitBuddy(
-                    self.buddy_dir, self.watch_dir, model_path=None
-                )
+                self.buddy = EnhancedBitBuddy(self.buddy_dir, self.watch_dir, model_path=None)
                 self.buddy.personality.name = name
                 self.buddy._save_personality(self.buddy.personality)
 
                 self.buddy_name_label.config(text=f"🤖 {name}")
-                self.status_label.config(
-                    text=f"Ready • Watching: {self.watch_dir.name}"
-                )
+                self.status_label.config(text=f"Ready • Watching: {self.watch_dir.name}")
 
                 setup_window.destroy()
 
@@ -270,9 +249,7 @@ class BuddyGUI:
             self.chat_display.insert("end", "You: ", "user")
             self.chat_display.insert("end", f"{text}\n\n")
         elif role == "buddy":
-            self.chat_display.insert(
-                "end", f"{self.buddy.personality.name}: ", "buddy"
-            )
+            self.chat_display.insert("end", f"{self.buddy.personality.name}: ", "buddy")
             self.chat_display.insert("end", f"{text}\n")
         elif role == "aside":
             self.chat_display.insert("end", f"  {text}\n\n", "aside")
@@ -310,18 +287,12 @@ class BuddyGUI:
                 files = response["file_results"][:3]  # Show top 3
                 if files:
                     file_list = "\n".join([f"  📄 {f['name']}" for f in files])
-                    self.add_chat_message(
-                        "aside", f"Relevant files:\n{file_list}"
-                    )
+                    self.add_chat_message("aside", f"Relevant files:\n{file_list}")
 
         except Exception as e:
-            self.add_chat_message(
-                "system", f"Oops! Something went wrong: {str(e)}"
-            )
+            self.add_chat_message("system", f"Oops! Something went wrong: {str(e)}")
         finally:
-            self.status_label.config(
-                text=f"Ready • Watching: {self.watch_dir.name}"
-            )
+            self.status_label.config(text=f"Ready • Watching: {self.watch_dir.name}")
 
     def rescan_files(self):
         """Trigger file rescan"""
@@ -333,15 +304,11 @@ class BuddyGUI:
 
         try:
             self.buddy.rag.index_files()
-            self.add_chat_message(
-                "system", "✓ File scan complete! I've updated my knowledge."
-            )
+            self.add_chat_message("system", "✓ File scan complete! I've updated my knowledge.")
         except Exception as e:
             self.add_chat_message("system", f"Scan failed: {str(e)}")
         finally:
-            self.status_label.config(
-                text=f"Ready • Watching: {self.watch_dir.name}"
-            )
+            self.status_label.config(text=f"Ready • Watching: {self.watch_dir.name}")
 
     def show_personality(self):
         """Show personality details"""
@@ -378,9 +345,9 @@ Total Experience: {len(p.experience_log)} events
         ).pack(pady=20)
 
         # Watch folder
-        tk.Label(
-            settings_window, text="Watch Folder:", font=("Arial", 10)
-        ).pack(anchor="w", padx=20, pady=(10, 5))
+        tk.Label(settings_window, text="Watch Folder:", font=("Arial", 10)).pack(
+            anchor="w", padx=20, pady=(10, 5)
+        )
 
         folder_frame = tk.Frame(settings_window)
         folder_frame.pack(fill="x", padx=20)
@@ -414,12 +381,8 @@ Total Experience: {len(p.experience_log)} events
             folder_var.set(str(self.watch_dir))
             if self.buddy:
                 self.buddy.watch_dir = self.watch_dir
-                self.status_label.config(
-                    text=f"Ready • Watching: {self.watch_dir.name}"
-                )
-                self.add_chat_message(
-                    "system", f"Now watching: {self.watch_dir}"
-                )
+                self.status_label.config(text=f"Ready • Watching: {self.watch_dir.name}")
+                self.add_chat_message("system", f"Now watching: {self.watch_dir}")
 
 
 def main():

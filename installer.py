@@ -3,32 +3,37 @@
 Bit Buddy Installer - Drive analyzer and model selector
 """
 
-import psutil
 import shutil
 from pathlib import Path
 from typing import Dict, Tuple
+
+import psutil
 
 
 class DriveAnalyzer:
     """Analyzes drive space and recommends appropriate model"""
 
     # Model requirements (in GB)
-    MODELS = {"tinyllama-1.1b": {"size_gb": 0.7,
-                                 "ram_gb": 2,
-                                 "description": "Ultra-lightweight (fastest)",
-                                 "url": "https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.q4_k_m.gguf",
-                                 },
-              "qwen2.5-1.5b": {"size_gb": 0.9,
-                               "ram_gb": 3,
-                               "description": "Recommended (best balance)",
-                               "url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf",
-                               },
-              "phi3.5-mini": {"size_gb": 2.3,
-                              "ram_gb": 4,
-                              "description": "Most capable (slower)",
-                              "url": "https://huggingface.co/microsoft/Phi-3.5-mini-instruct-gguf/resolve/main/Phi-3.5-mini-instruct-q4.gguf",
-                              },
-              }
+    MODELS = {
+        "tinyllama-1.1b": {
+            "size_gb": 0.7,
+            "ram_gb": 2,
+            "description": "Ultra-lightweight (fastest)",
+            "url": "https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.q4_k_m.gguf",
+        },
+        "qwen2.5-1.5b": {
+            "size_gb": 0.9,
+            "ram_gb": 3,
+            "description": "Recommended (best balance)",
+            "url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf",
+        },
+        "phi3.5-mini": {
+            "size_gb": 2.3,
+            "ram_gb": 4,
+            "description": "Most capable (slower)",
+            "url": "https://huggingface.co/microsoft/Phi-3.5-mini-instruct-gguf/resolve/main/Phi-3.5-mini-instruct-q4.gguf",
+        },
+    }
 
     @staticmethod
     def get_drive_info(drive_path: str = None) -> Dict:
@@ -73,10 +78,7 @@ class DriveAnalyzer:
             model = cls.MODELS[model_id]
             total_required = model["size_gb"] + 1.0  # +1GB for app & data
 
-            if (
-                free_space_gb >= total_required
-                and available_ram_gb >= model["ram_gb"]
-            ):
+            if free_space_gb >= total_required and available_ram_gb >= model["ram_gb"]:
                 return model_id, {
                     "model": model,
                     "drive_info": drive_info,
@@ -132,9 +134,7 @@ class InstallationPlanner:
             watch_folder = Path.home() / "Documents"
 
         # Get model recommendation (returns tuple)
-        model_id, model_info = self.analyzer.recommend_model(
-            self.install_drive
-        )
+        model_id, model_info = self.analyzer.recommend_model(self.install_drive)
 
         # Estimate space needed
         index_size = self.analyzer.estimate_index_size(watch_folder)
@@ -167,12 +167,8 @@ class InstallationPlanner:
     def check_prerequisites(self) -> Dict:
         """Check system prerequisites"""
         checks = {
-            "python": shutil.which("python") is not None
-            or shutil.which("python3") is not None,
-            "space": self.analyzer.get_drive_info(self.install_drive)[
-                "free_gb"
-            ]
-            >= 2.0,
+            "python": shutil.which("python") is not None or shutil.which("python3") is not None,
+            "space": self.analyzer.get_drive_info(self.install_drive)["free_gb"] >= 2.0,
             "ram": self.analyzer.get_ram_info()["available_gb"] >= 2.0,
         }
 
@@ -189,15 +185,11 @@ def main():
 
     print("📊 System Information:")
     drive = analyzer.get_drive_info()
-    print(
-        f"  Drive Space: {drive['free_gb']:.1f}GB free of {drive['total_gb']:.1f}GB"
-    )
+    print(f"  Drive Space: {drive['free_gb']:.1f}GB free of {drive['total_gb']:.1f}GB")
     print(f"  Usage: {drive['percent_used']:.1f}%")
 
     ram = analyzer.get_ram_info()
-    print(
-        f"\n  RAM: {ram['available_gb']:.1f}GB available of {ram['total_gb']:.1f}GB"
-    )
+    print(f"\n  RAM: {ram['available_gb']:.1f}GB available of {ram['total_gb']:.1f}GB")
     print(f"  Usage: {ram['percent_used']:.1f}%")
 
     # Get recommendation
@@ -217,9 +209,7 @@ def main():
     print(f"  Watch folder: {plan['watch_folder']}")
     print(f"  Total space needed: {plan['space']['total_needed_gb']:.1f}GB")
     print(f"  Available: {plan['space']['available_gb']:.1f}GB")
-    print(
-        f"  Can install: {'✓ YES' if plan['space']['can_install'] else '✗ NO'}"
-    )
+    print(f"  Can install: {'✓ YES' if plan['space']['can_install'] else '✗ NO'}")
 
     # Prerequisites
     prereqs = planner.check_prerequisites()
@@ -227,9 +217,7 @@ def main():
     print(f"  Python: {'✓' if prereqs['python'] else '✗'}")
     print(f"  Disk Space: {'✓' if prereqs['space'] else '✗'}")
     print(f"  RAM: {'✓' if prereqs['ram'] else '✗'}")
-    print(
-        f"\n  Ready to install: {'YES!' if prereqs['all_pass'] else 'NO - check requirements'}"
-    )
+    print(f"\n  Ready to install: {'YES!' if prereqs['all_pass'] else 'NO - check requirements'}")
 
 
 if __name__ == "__main__":

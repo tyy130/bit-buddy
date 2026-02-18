@@ -72,9 +72,7 @@ class BitBuddyDebugger:
         console_handler.setLevel(logging.INFO)
 
         # Formatter
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         file_handler.setFormatter(formatter)
         console_handler.setFormatter(formatter)
 
@@ -88,9 +86,7 @@ class BitBuddyDebugger:
         session_id = f"debug_{int(time.time())}"
 
         if self.buddy:
-            buddy_name = buddy_name or getattr(
-                self.buddy.personality, "name", "unknown"
-            )
+            buddy_name = buddy_name or getattr(self.buddy.personality, "name", "unknown")
             watch_dir = str(self.buddy.watch_dir)
             model_path = str(getattr(self.buddy, "model_path", "none"))
         else:
@@ -107,11 +103,7 @@ class BitBuddyDebugger:
             issues=[],
             performance_metrics={},
             log_file=str(
-                [
-                    h.baseFilename
-                    for h in self.logger.handlers
-                    if hasattr(h, "baseFilename")
-                ][0]
+                [h.baseFilename for h in self.logger.handlers if hasattr(h, "baseFilename")][0]
             ),
         )
 
@@ -131,9 +123,7 @@ class BitBuddyDebugger:
             return
 
         self.monitoring_active = True
-        self.monitor_thread = threading.Thread(
-            target=self._performance_monitor, daemon=True
-        )
+        self.monitor_thread = threading.Thread(target=self._performance_monitor, daemon=True)
         self.monitor_thread.start()
 
         self.logger.info("📊 Performance monitoring started")
@@ -154,9 +144,7 @@ class BitBuddyDebugger:
                         process = psutil.Process()
                         process_metrics = {
                             "cpu_percent": process.cpu_percent(),
-                            "memory_mb": process.memory_info().rss
-                            / 1024
-                            / 1024,
+                            "memory_mb": process.memory_info().rss / 1024 / 1024,
                             "num_threads": process.num_threads(),
                             "open_files": len(process.open_files()),
                         }
@@ -178,16 +166,12 @@ class BitBuddyDebugger:
                 }
 
                 # Check for issues
-                self._check_performance_issues(
-                    cpu_percent, memory.percent, process_metrics
-                )
+                self._check_performance_issues(cpu_percent, memory.percent, process_metrics)
 
                 # Cleanup old data (keep last hour)
                 cutoff_time = timestamp - 3600
                 self.performance_data = {
-                    k: v
-                    for k, v in self.performance_data.items()
-                    if k > cutoff_time
+                    k: v for k, v in self.performance_data.items() if k > cutoff_time
                 }
 
             except Exception as e:
@@ -207,21 +191,15 @@ class BitBuddyDebugger:
 
         # High memory usage
         if memory_percent > 85:
-            issues_found.append(
-                f"High system memory usage: {memory_percent:.1f}%"
-            )
+            issues_found.append(f"High system memory usage: {memory_percent:.1f}%")
 
         # High process memory (if available)
         if process_metrics.get("memory_mb", 0) > 1000:  # >1GB
-            issues_found.append(
-                f"High process memory: {process_metrics['memory_mb']:.1f}MB"
-            )
+            issues_found.append(f"High process memory: {process_metrics['memory_mb']:.1f}MB")
 
         # Too many open files
         if process_metrics.get("open_files", 0) > 100:
-            issues_found.append(
-                f"Many open files: {process_metrics['open_files']}"
-            )
+            issues_found.append(f"Many open files: {process_metrics['open_files']}")
 
         # Log new issues
         for issue in issues_found:
@@ -229,14 +207,10 @@ class BitBuddyDebugger:
                 self.issues.append(issue)
                 self.logger.warning(f"⚠️  Performance issue detected: {issue}")
 
-    def log_buddy_action(
-        self, action: str, details: Dict = None, duration: float = None
-    ):
+    def log_buddy_action(self, action: str, details: Dict = None, duration: float = None):
         """Log a buddy action for debugging"""
         # Log the action (keep simple; avoid unused local variables)
-        self.logger.info(
-            f"🤖 Action: {action} {f'({duration*1000:.1f}ms)' if duration else ''}"
-        )
+        self.logger.info(f"🤖 Action: {action} {f'({duration*1000:.1f}ms)' if duration else ''}")
         if details:
             self.logger.debug(f"   Details: {json.dumps(details, indent=2)}")
 
@@ -250,13 +224,9 @@ class BitBuddyDebugger:
             "traceback": traceback.format_exc(),
         }
 
-        self.issues.append(
-            f"{error_info['error_type']}: {error_info['error_message']}"
-        )
+        self.issues.append(f"{error_info['error_type']}: {error_info['error_message']}")
 
-        self.logger.error(
-            f"❌ Error in {context or 'unknown context'}: {error}"
-        )
+        self.logger.error(f"❌ Error in {context or 'unknown context'}: {error}")
         self.logger.debug(f"   Traceback:\n{error_info['traceback']}")
 
     def debug_file_system(self) -> Dict[str, Any]:
@@ -269,13 +239,9 @@ class BitBuddyDebugger:
                 "path": str(self.buddy.watch_dir),
                 "exists": self.buddy.watch_dir.exists(),
                 "is_directory": (
-                    self.buddy.watch_dir.is_dir()
-                    if self.buddy.watch_dir.exists()
-                    else False
+                    self.buddy.watch_dir.is_dir() if self.buddy.watch_dir.exists() else False
                 ),
-                "permissions": self._check_directory_permissions(
-                    self.buddy.watch_dir
-                ),
+                "permissions": self._check_directory_permissions(self.buddy.watch_dir),
                 "file_count": (
                     len(list(self.buddy.watch_dir.rglob("*")))
                     if self.buddy.watch_dir.exists()
@@ -286,9 +252,7 @@ class BitBuddyDebugger:
                 "path": str(self.buddy.buddy_dir),
                 "exists": self.buddy.buddy_dir.exists(),
                 "files": (
-                    list(self.buddy.buddy_dir.glob("*"))
-                    if self.buddy.buddy_dir.exists()
-                    else []
+                    list(self.buddy.buddy_dir.glob("*")) if self.buddy.buddy_dir.exists() else []
                 ),
             },
             "rag_system": self._debug_rag_system(),
@@ -321,9 +285,7 @@ class BitBuddyDebugger:
             cursor = rag.conn.execute("SELECT COUNT(*) FROM files")
             indexed_files = cursor.fetchone()[0]
 
-            cursor = rag.conn.execute(
-                "SELECT file_path, content_preview FROM files LIMIT 5"
-            )
+            cursor = rag.conn.execute("SELECT file_path, content_preview FROM files LIMIT 5")
             sample_files = cursor.fetchall()
 
             # Check vector database
@@ -340,13 +302,8 @@ class BitBuddyDebugger:
                 "database_file": str(rag.db_path),
                 "indexed_files": indexed_files,
                 "vector_embeddings": vector_count,
-                "sample_files": [
-                    {"path": row[0], "preview": row[1][:100]}
-                    for row in sample_files
-                ],
-                "status": (
-                    "healthy" if indexed_files > 0 else "no_files_indexed"
-                ),
+                "sample_files": [{"path": row[0], "preview": row[1][:100]} for row in sample_files],
+                "status": ("healthy" if indexed_files > 0 else "no_files_indexed"),
             }
 
         except Exception as e:
@@ -387,19 +344,13 @@ class BitBuddyDebugger:
                 "specialties": personality.specialties,
             },
             "files": {
-                "personality_file": (
-                    personality.buddy_dir / "personality.json"
-                ).exists(),
-                "experience_file": (
-                    personality.buddy_dir / "experience.json"
-                ).exists(),
+                "personality_file": (personality.buddy_dir / "personality.json").exists(),
+                "experience_file": (personality.buddy_dir / "experience.json").exists(),
             },
             "experience": {
                 "total_events": len(personality.experience_log),
                 "recent_events": (
-                    personality.experience_log[-5:]
-                    if personality.experience_log
-                    else []
+                    personality.experience_log[-5:] if personality.experience_log else []
                 ),
             },
         }
@@ -422,24 +373,16 @@ class BitBuddyDebugger:
             debug_info["model_file"] = {
                 "exists": model_path.exists(),
                 "size_mb": (
-                    model_path.stat().st_size / (1024 * 1024)
-                    if model_path.exists()
-                    else 0
+                    model_path.stat().st_size / (1024 * 1024) if model_path.exists() else 0
                 ),
-                "readable": (
-                    os.access(model_path, os.R_OK)
-                    if model_path.exists()
-                    else False
-                ),
+                "readable": (os.access(model_path, os.R_OK) if model_path.exists() else False),
             }
 
         # Check brain system
         if hasattr(self.buddy, "brain"):
             debug_info["brain_system"] = {
                 "type": type(self.buddy.brain).__name__,
-                "model_loaded": getattr(
-                    self.buddy.brain, "model_loaded", False
-                ),
+                "model_loaded": getattr(self.buddy.brain, "model_loaded", False),
                 "last_error": getattr(self.buddy.brain, "last_error", None),
             }
 
@@ -458,20 +401,14 @@ class BitBuddyDebugger:
         # File system check
         fs_debug = self.debug_file_system()
         health["checks"]["file_system"] = {
-            "status": (
-                "healthy"
-                if fs_debug.get("watch_directory", {}).get("exists")
-                else "error"
-            ),
+            "status": ("healthy" if fs_debug.get("watch_directory", {}).get("exists") else "error"),
             "details": fs_debug,
         }
 
         # Personality check
         personality_debug = self.debug_personality_system()
         health["checks"]["personality"] = {
-            "status": (
-                "healthy" if "error" not in personality_debug else "error"
-            ),
+            "status": ("healthy" if "error" not in personality_debug else "error"),
             "details": personality_debug,
         }
 
@@ -494,31 +431,21 @@ class BitBuddyDebugger:
             }
 
         # Generate recommendations
-        if (
-            not health["checks"]["file_system"]["details"]
-            .get("watch_directory", {})
-            .get("exists")
-        ):
+        if not health["checks"]["file_system"]["details"].get("watch_directory", {}).get("exists"):
             health["recommendations"].append(
                 "Watch directory does not exist - check path configuration"
             )
 
         if (
-            health["checks"]["file_system"]["details"]
-            .get("rag_system", {})
-            .get("indexed_files", 0)
+            health["checks"]["file_system"]["details"].get("rag_system", {}).get("indexed_files", 0)
             == 0
         ):
-            health["recommendations"].append(
-                "No files indexed - run file indexing"
-            )
+            health["recommendations"].append("No files indexed - run file indexing")
 
         if len(health["issues"]) > 0:
             health["overall_status"] = "warning"
 
-        if any(
-            check["status"] == "error" for check in health["checks"].values()
-        ):
+        if any(check["status"] == "error" for check in health["checks"].values()):
             health["overall_status"] = "error"
 
         return health
@@ -542,14 +469,8 @@ class BitBuddyDebugger:
 
         # Performance summary
         if self.performance_data:
-            cpu_values = [
-                d["system"]["cpu_percent"]
-                for d in self.performance_data.values()
-            ]
-            memory_values = [
-                d["system"]["memory_percent"]
-                for d in self.performance_data.values()
-            ]
+            cpu_values = [d["system"]["cpu_percent"] for d in self.performance_data.values()]
+            memory_values = [d["system"]["memory_percent"] for d in self.performance_data.values()]
 
             report_lines.extend(
                 [
@@ -557,7 +478,8 @@ class BitBuddyDebugger:
                     f"Peak CPU: {max(cpu_values):.1f}%",
                     f"Average Memory: {sum(memory_values)/len(memory_values):.1f}%",
                     f"Peak Memory: {max(memory_values):.1f}%",
-                ])
+                ]
+            )
         else:
             report_lines.append("No performance data collected")
 
@@ -586,9 +508,7 @@ class BitBuddyDebugger:
                 if check_info["status"] == "healthy"
                 else "⚠️" if check_info["status"] == "warning" else "❌"
             )
-            report_lines.append(
-                f"{status_emoji} {check_name}: {check_info['status']}"
-            )
+            report_lines.append(f"{status_emoji} {check_name}: {check_info['status']}")
 
         # Recommendations
         if health["recommendations"]:
@@ -635,9 +555,7 @@ class DebugContext:
 
     def __enter__(self):
         self.start_time = time.time()
-        self.debugger.logger.debug(
-            f"🚀 Starting operation: {self.operation_name}"
-        )
+        self.debugger.logger.debug(f"🚀 Starting operation: {self.operation_name}")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -646,9 +564,7 @@ class DebugContext:
         if exc_type:
             self.debugger.log_error(exc_val, self.operation_name)
         else:
-            self.debugger.log_buddy_action(
-                self.operation_name, duration=duration
-            )
+            self.debugger.log_buddy_action(self.operation_name, duration=duration)
 
 
 # Utility functions for quick debugging
@@ -746,12 +662,8 @@ if __name__ == "__main__":
     subparsers.add_parser("health", help="System health check")
 
     # Performance monitor
-    perf_parser = subparsers.add_parser(
-        "monitor", help="Start performance monitoring"
-    )
-    perf_parser.add_argument(
-        "--duration", type=int, default=60, help="Monitor duration in seconds"
-    )
+    perf_parser = subparsers.add_parser("monitor", help="Start performance monitoring")
+    perf_parser.add_argument("--duration", type=int, default=60, help="Monitor duration in seconds")
 
     args = parser.parse_args()
 

@@ -209,9 +209,7 @@ class BitBuddyDebugger:
 
         # Keep only last 100 measurements
         if len(self.operation_times[operation_name]) > 100:
-            self.operation_times[operation_name] = self.operation_times[
-                operation_name
-            ][-100:]
+            self.operation_times[operation_name] = self.operation_times[operation_name][-100:]
 
     def add_breakpoint(self, name: str, condition: Callable[[], bool]):
         """Add a conditional breakpoint
@@ -302,9 +300,7 @@ class BitBuddyDebugger:
         # Check brain
         try:
             if hasattr(self.buddy, "brain"):
-                results["brain_status"] = (
-                    "available" if self.buddy.brain.available else "fallback"
-                )
+                results["brain_status"] = "available" if self.buddy.brain.available else "fallback"
         except Exception as e:
             results["issues"].append(f"Brain check failed: {e}")
 
@@ -320,9 +316,7 @@ class BitBuddyDebugger:
 
         return results
 
-    def get_recent_events(
-        self, count: int = 50, event_type: str = None
-    ) -> List[Dict[str, Any]]:
+    def get_recent_events(self, count: int = 50, event_type: str = None) -> List[Dict[str, Any]]:
         """Get recent debug events
 
         Args:

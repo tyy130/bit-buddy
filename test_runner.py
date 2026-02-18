@@ -151,21 +151,13 @@ def main():
         help="Type of tests to run (default: all)",
     )
 
-    parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Verbose output"
-    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
 
-    parser.add_argument(
-        "-c", "--coverage", action="store_true", help="Enable coverage reporting"
-    )
+    parser.add_argument("-c", "--coverage", action="store_true", help="Enable coverage reporting")
 
-    parser.add_argument(
-        "-x", "--failfast", action="store_true", help="Stop on first failure"
-    )
+    parser.add_argument("-x", "--failfast", action="store_true", help="Stop on first failure")
 
-    parser.add_argument(
-        "-p", "--path", help="Specific test file or directory"
-    )
+    parser.add_argument("-p", "--path", help="Specific test file or directory")
 
     parser.add_argument(
         "--check-imports",

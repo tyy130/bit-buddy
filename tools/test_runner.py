@@ -123,9 +123,7 @@ class TestRunner:
         print("🚀 Running performance tests...")
 
         args = ["-v"] if verbose else ["-q"]
-        args.extend(
-            [str(self.test_dir / "test_buddy_system.py"), "-m", "performance"]
-        )
+        args.extend([str(self.test_dir / "test_buddy_system.py"), "-m", "performance"])
 
         result = pytest.main(args)
 
@@ -136,9 +134,7 @@ class TestRunner:
 
         return self.results["performance_tests"]
 
-    def run_model_tests(
-        self, model_path: Path = None, verbose: bool = False
-    ) -> Dict[str, Any]:
+    def run_model_tests(self, model_path: Path = None, verbose: bool = False) -> Dict[str, Any]:
         """Run tests that require AI models"""
         if not model_path or not model_path.exists():
             print("⚠️  Skipping model tests - no model file provided")
@@ -360,9 +356,7 @@ class TestRunner:
 
     def _calculate_overall_status(self) -> str:
         """Calculate overall test status"""
-        statuses = [
-            result.get("status", "unknown") for result in self.results.values()
-        ]
+        statuses = [result.get("status", "unknown") for result in self.results.values()]
 
         if any(status == "failed" for status in statuses):
             return "failed"
@@ -388,9 +382,7 @@ class TestRunner:
         }
 
         overall_emoji = status_emoji.get(summary["overall_status"], "❓")
-        print(
-            f"{overall_emoji} Overall Status: {summary['overall_status'].upper()}"
-        )
+        print(f"{overall_emoji} Overall Status: {summary['overall_status'].upper()}")
         print(f"⏱️  Total Duration: {summary['total_duration']:.1f}s")
         print()
 
@@ -413,30 +405,18 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Bit Buddy Test Runner")
-    parser.add_argument(
-        "--unit", action="store_true", help="Run unit tests only"
-    )
-    parser.add_argument(
-        "--integration", action="store_true", help="Run integration tests"
-    )
-    parser.add_argument(
-        "--performance", action="store_true", help="Run performance tests"
-    )
-    parser.add_argument(
-        "--stress", action="store_true", help="Run stress tests"
-    )
-    parser.add_argument(
-        "--model", type=Path, help="Path to AI model for model tests"
-    )
+    parser.add_argument("--unit", action="store_true", help="Run unit tests only")
+    parser.add_argument("--integration", action="store_true", help="Run integration tests")
+    parser.add_argument("--performance", action="store_true", help="Run performance tests")
+    parser.add_argument("--stress", action="store_true", help="Run stress tests")
+    parser.add_argument("--model", type=Path, help="Path to AI model for model tests")
     parser.add_argument(
         "--stress-duration",
         type=int,
         default=30,
         help="Stress test duration (seconds)",
     )
-    parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Verbose output"
-    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument("--all", action="store_true", help="Run all tests")
 
     args = parser.parse_args()
