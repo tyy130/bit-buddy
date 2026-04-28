@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import requests
 from fastapi import FastAPI, HTTPException
+from requests import RequestException
 from pydantic import BaseModel
 
 from .rag import RAG, load_config
@@ -40,6 +41,16 @@ def _ensure_rag() -> bool:
         return False
 
 
+def _extract_llm_text(response_data: dict, provider: str) -> str:
+    """Extract assistant text from provider-specific response payloads."""
+    try:
+        if provider == "llamacpp":
+            return response_data["choices"][0]["message"]["content"]
+        return response_data["message"]["content"]
+    except (KeyError, IndexError, TypeError) as exc:
+        raise ValueError(f"Invalid {provider} response payload") from exc
+
+
 class ChatIn(BaseModel):
     query: str
     k: int | None = 5
@@ -54,7 +65,7 @@ async def reindex():
         )
 
     # Run build_index in thread pool to avoid blocking event loop
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     n_chunks = await loop.run_in_executor(executor, rag.build_index)
     return {"status": "ok", "chunks": n_chunks}
 
@@ -70,10 +81,12 @@ def chat(inp: ChatIn):
     ctx = rag.retrieve(inp.query, k=inp.k or 5)
     prompt = rag.build_prompt(inp.query, ctx)
 
-    if cfg["llm"]["provider"] == "llamacpp":
+    provider = cfg["llm"]["provider"]
+    system_msg = "You are a concise assistant that only uses the provided context."
+
+    if provider == "llamacpp":
         base_url = cfg["llm"]["llamacpp"]["base_url"].rstrip("/")
         url = f"{base_url}/v1/chat/completions"
-        system_msg = "You are a concise assistant that only uses " "the provided context."
         payload = {
             "model": cfg["llm"]["llamacpp"]["model"],
             "messages": [
@@ -83,14 +96,8 @@ def chat(inp: ChatIn):
             "temperature": 0.3,
             "max_tokens": 512,
         }
-        r = requests.post(url, json=payload, timeout=120)
-        r.raise_for_status()
-        data = r.json()
-        text = data["choices"][0]["message"]["content"]
     else:
-        # Ollama
         url = cfg["llm"]["ollama"]["base_url"].rstrip("/") + "/api/chat"
-        system_msg = "You are a concise assistant that only uses " "the provided context."
         payload = {
             "model": cfg["llm"]["ollama"]["model"],
             "messages": [
@@ -99,10 +106,15 @@ def chat(inp: ChatIn):
             ],
             "stream": False,
         }
-        r = requests.post(url, json=payload, timeout=120)
-        r.raise_for_status()
-        data = r.json()
-        text = data["message"]["content"]
+
+    try:
+        response = requests.post(url, json=payload, timeout=120)
+        response.raise_for_status()
+        text = _extract_llm_text(response.json(), provider)
+    except RequestException as exc:
+        raise HTTPException(status_code=502, detail=f"LLM upstream request failed: {exc}") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     return {"answer": text, "context": ctx}
 
